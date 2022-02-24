@@ -9,9 +9,11 @@ add-local-dev-user:
 
 reset: drop-db create-db # add-local-dev-user
 	mysql -u root wikirumours < db_setup/wikirumours_msf.sql
+	mysql -u root wikirumours < db_setup/add-dev-user.sql
 
 blank-reset: drop-db create-db # add-local-dev-user
 	mysql -u root wikirumours < db_setup/import_me.sql
+	mysql -u root wikirumours < db_setup/add-dev-user.sql
 
 # Doesn't work, as needs full .htaccess router thing...
 # run:
