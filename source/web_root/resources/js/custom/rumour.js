@@ -64,11 +64,11 @@
 	Comments
 	-------------------------------------- */
 
-	function validateAddCommentForm() {
+	function validateAddCommentForm(form) {
 		errorMessage = '';
-		if (!document.addCommentForm.new_comment.value) errorMessage += "Please provide a comment.\n";
+		if (!form.new_comment.value) errorMessage += "Please provide a comment.\n";
 		if (errorMessage) alert(errorMessage);
-		else document.addCommentForm.submit();
+		else form.submit();
 	}
 	
 	function validateModerateCommentsForm(action, commentID) {
