@@ -171,7 +171,7 @@
 			echo "<div id='addComment' class='collapse'>\n";
 			echo "  <div class='row form-group'>\n";
 			echo "    <div class='col-md-10'>" . $form->input('textarea', 'new_comment', @$_POST['new_comment'], true, '|Add your thoughts...', 'form-control') . "</div>\n";
-			echo "    <div class='col-md-2'>" . $form->input('submit', 'submitComment', null, false, 'Submit', 'btn btn-info', null, null, null, null, array('onClick'=>'validateAddCommentForm(); return false;')) . "</div>\n";
+			echo "    <div class='col-md-2'>" . $form->input('submit', 'submitComment', null, false, 'Submit', 'btn btn-info', null, null, null, null, array('onClick'=>'validateAddCommentForm(this.form); return false;')) . "</div>\n";
 			echo "  </div>\n";
 			echo "</div>\n";
 			echo $form->end() . "\n";
@@ -284,6 +284,18 @@
 /*	--------------------------------------
 	Comments tab
 	-------------------------------------- */
+
+	// add comment
+		if ($logged_in) {
+			echo $form->start('addCommentForm', '', 'post', null, null, array('onSubmit'=>'return false;')) . "\n";
+			echo "<div id='addComment2' class=''>\n";
+			echo "  <div class='row form-group'>\n";
+			echo "    <div class='col-md-10'>" . $form->input('textarea', 'new_comment', @$_POST['new_comment'], true, '|Add your thoughts...', 'form-control') . "</div>\n";
+			echo "    <div class='col-md-2'>" . $form->input('submit', 'submitComment', null, false, 'Submit', 'btn btn-info', null, null, null, null, array('onClick'=>'validateAddCommentForm(this.form); return false;')) . "</div>\n";
+			echo "  </div>\n";
+			echo "</div>\n";
+			echo $form->end() . "\n";
+		}
 
 	if (!count($comments)) echo "<p>None yet.</p>\n";
 	else {
