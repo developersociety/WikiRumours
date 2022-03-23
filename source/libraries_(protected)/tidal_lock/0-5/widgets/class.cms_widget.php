@@ -313,7 +313,7 @@
 
 						// save file(s)
 							$timestamp = date('Y-m-d H:i:s');
-							if (@end(@$_POST['file_cms_upload'])) {
+							if (@end($_POST['file_cms_upload'])) {
 								$new_path = __DIR__ . '/../../../../web_root/' . $this->file_path . '/' . date('YmdHis', strtotime($timestamp));
 								$success = @mkdir($new_path);
 								if (!$success || !file_exists($new_path)) $tl->page['error'] .= "Unable to create subdirectory for this upload. ";
