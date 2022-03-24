@@ -18,7 +18,8 @@
 			}
 		}
 		
-		if (@$filters['view'] != 'sightings' && @$filters['view'] != 'comments') $filters['view'] = 'rumour';
+		// Set a default tab view if none of the correct options are set
+		if (!in_array(@$filters['view'], ['sightings', 'comments', 'response'])) $filters['view'] = 'rumour';
 		
 	// queries
 		if ($logged_in['is_moderator'] || $logged_in['is_administrator']) $rumour = retrieveRumours(array('public_id'=>$publicID), null, null, null, 1);

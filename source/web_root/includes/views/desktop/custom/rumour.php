@@ -5,6 +5,7 @@
 		echo "  <li" . ($filters['view'] == 'rumour' ? " class='active'" : false) . "><a href='#rumour' data-toggle='tab'>Rumour</a></li>\n";
 		echo "  <li" . ($filters['view'] == 'sightings' ? " class='active'" : false) . "><a href='#sightings' data-toggle='tab' onClick='if (!mapLoaded) populateMap();'>Sightings (" . count($sightings) . ")</a></li>\n";
 		echo "  <li" . ($filters['view'] == 'comments' ? " class='active'" : false) . "><a href='#comments' data-toggle='tab'>Comments" . (@$numberOfComments ? " (" . $numberOfComments . ")" : false) . "</a></li>\n";
+		echo "  <li" . ($filters['view'] == 'response' ? " class='active'" : false) . "><a href='#response' data-toggle='tab'>Response</a></li>";
 		echo "</ul><br />\n\n";
 
 	echo "<div class='tab-content'>\n";
@@ -366,7 +367,19 @@
 			echo $form->paginate($page, $numberOfPages, '/rumour/' . $publicID . $parser->seoFriendlySuffix($rumour[0]['description']) . '/' . $keyvalue_array->updateKeyValue($tl->page['parameter3'], 'page', '#', '|'));
 		}
 
-	echo "  </div>\n";
+	echo "  </div>\n"; // end of comments tab
+
+	// Now to do the 'Response' tab'
+	echo '<div class="tab-pane' . ($filters['view'] == 'response' ? " active": '') . '" id="response">';
+	
+	renderTemplate('rumours/response.php', [
+		'active' => $filters['view'] === 'response',
+		// 'discussion_form' => $discussion_form,
+	]);
+
+	echo "</div>\n"; // end of response tab
+
+	// End of all tab pages:
 	echo "</div>\n";
 		
 ?>
