@@ -372,8 +372,14 @@
 	// Now to do the 'Response' tab'
 	echo '<div class="tab-pane' . ($filters['view'] == 'response' ? " active": '') . '" id="response">';
 	
+	$response_form = '';
+	$response_form .= $form->start('responseForm', '', 'post');
+	$response_form .= $form->input('text', 'who', null, false, 'Who:');
+	$response_form .= $form->end();
+
 	renderTemplate('rumours/response.php', [
 		'active' => $filters['view'] === 'response',
+		'form' => $response_form // ,
 		// 'discussion_form' => $discussion_form,
 	]);
 
