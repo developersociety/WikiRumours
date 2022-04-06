@@ -372,15 +372,37 @@
 	// Now to do the 'Response' tab'
 	echo '<div class="tab-pane' . ($filters['view'] == 'response' ? " active": '') . '" id="response">';
 	
-	$response_form = '';
-	$response_form .= $form->start('responseForm', '', 'post');
-	$response_form .= $form->input('text', 'who', null, false, 'Who:');
-	$response_form .= $form->end();
+	function create_response_form($rumour, $allModeratorsAndCommunityLiaisons) {
+		global $form;
+		global $operators;
+
+		$response_form = '';
+		$response_form .= $form->start('responseForm', '', 'post');
+		//$response_form .= $form->input('text', 'who', null, false, 'Who:');
+		$response_form .= $form->row(
+			'select', 'response_who', $operators->firstTrue(@$_POST['response_who'],
+			@$rumour[0]['response_who']), false, 'Who:', 'form-control',
+			$allModeratorsAndCommunityLiaisons
+		);
+		$response_form .= $form->row(
+			'date', 'response_start_date', $operators->firstTrue(@$_POST['response_start_date'],
+			@$rumour[0]['response_start_date']), false, 'Start Date:', 'form-control'
+		);
+		$response_form .= $form->row(
+			'textarea', 'response_outcomes', $operators->firstTrue(@$_POST['response_outcomes'], @$rumour[0]['response_outcomes']), false, 'Outcomes:', 'form-control', $allModeratorsAndCommunityLiaisons);
+
+		$response_form .= $form->end();
+		return $response_form;
+	}
+
+	echo '!e!!!';
+	print_r($allModeratorsAndCommunityLiaisons);
+	$response_form = create_response_form($rumour, $allModeratorsAndCommunityLiaisons);
 
 	renderTemplate('rumours/response.php', [
+		'form' => $response_form,
+		'discussion_form' => $discussion_form,
 		'active' => $filters['view'] === 'response',
-		'form' => $response_form // ,
-		// 'discussion_form' => $discussion_form,
 	]);
 
 	renderTemplate('rumours/comment_form.php', [
