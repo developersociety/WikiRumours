@@ -362,11 +362,30 @@
 	}
 
 	class ResponseForm {
+		/*
+		 * A Form class, kind of how django does it - keeping the rendering, saving, parsing,
+		 * cleaning & validation all together.
+		 *
+		 * Usage:
+		 * $responseForm =new ResponseForm($rumour, $allValidUsersForDropDown);
+		 * if (is a POST response) {
+		 *		$responseForm->injest($_POST);
+		 *		if ($responseForm->is_valid()) {
+		 *			$responseForm->save();
+		 *		}
+		 * }
+		 *
+		 * ...
+		 * echo $responseForm->render();
+		 * ...
+		 *
+		 * */
 		private $rumour;
 		private $relevantUsers;
 		public $data;
 		public $errors;
 
+		// Which field(names) it should look for in $_POST or the $rumour object:
 		private $fields = array(
 			'response_who',
 			'response_start_date',
@@ -386,6 +405,10 @@
 		}
 
 		public function clean_value($name, $value) {
+			/*
+			 * Every field gets dropped through this function.
+			 * Raise an exception if you want it to show up as an error.
+			 * */
 			// TODO - switch & clean...
 			switch ($name) {
 			case 'response_who':
@@ -398,6 +421,9 @@
 		}
 
 		public function injest($data) {
+			/* Given an key => value array, load all known fields into $this->data,
+			 * storing any errors.
+			 */
 			foreach($this->fields as $fieldname) {
 				try {
 					$this->data[$fieldname] = $this->clean_value($fieldname, $data[$fieldname]);
@@ -408,7 +434,12 @@
 		}
 
 		public function render() {
-			global $form;
+			/*
+			 * returns HTML to send to the visitor.
+			 */
+			global $form; // the CMS form renderer...
+
+			// TODO - for each field display any errors.
 
 			$response_form = '';
 			$response_form .= $form->start('responseForm', '', 'post');
