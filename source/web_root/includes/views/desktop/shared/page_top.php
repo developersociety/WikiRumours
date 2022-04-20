@@ -142,7 +142,7 @@
 		// logo
 			echo "        <div id='logo' class='col-xs-12 col-sm-3 col-md-3 col-lg-3'>\n";
 			echo "          <h1 class='hidden'>" . htmlspecialchars($tl->settings['Name of this application'], ENT_QUOTES) . "</h1>\n";
-			echo "          <a href='/'><img src='" . (@$tl->page['domain_alias']['destination_url'] && file_exists($tl->page['domain_alias']['destination_url']) ? '/' . $tl->page['domain_alias']['destination_url'] : "/resources/img/logo.png") . "' border='0' class='img-responsive' alt='" . htmlspecialchars($tl->settings['Name of this application'], ENT_QUOTES) . "' /></a>\n";
+			echo "          <a href='/'><img src='" . (@$tl->page['domain_alias']['destination_url'] && file_exists($tl->page['domain_alias']['destination_url']) ? '/' . $tl->page['domain_alias']['destination_url'] : $tl->defaultHeaderLogo) . "' border='0' class='img-responsive' alt='" . htmlspecialchars($tl->settings['Name of this application'], ENT_QUOTES) . "' /></a>\n";
 			echo "        </div><!-- logo -->\n\n";
 	
 		// header
