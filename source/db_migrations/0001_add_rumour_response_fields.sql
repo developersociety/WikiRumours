@@ -12,10 +12,13 @@ ALTER
     ADD response_who int(9) UNSIGNED,
     ADD response_start_date date,
     ADD response_duration_weeks int,
-    ADD reponse_completion_date date,
+    ADD response_completion_date date,
     ADD response_completed bool NOT NULL default false,
     ADD response_outcomes text COLLATE utf8_unicode_ci NOT NULL,
-    ADD FOREIGN KEY (response_who) REFERENCES wr_users(user_id)
+	-- It would be nice to do:
+    --     ADD FOREIGN KEY (response_who) REFERENCES wr_users(user_id)
+	-- but...
+	-- it looks like this awful 'CMS' doesn't support it. :'(
 ;
 
 INSERT
