@@ -70,6 +70,9 @@
 	if (@$filters['view'] == 'sightings') $tl->page['events'] = "populateMap();";
 	$tl->page['description'] = $rumour[0]['description'];
 
+
+	$responseForm = new ResponseForm($rumour[0], $allUsers);
+
 /*	--------------------------------------
 	Execute only if a form post
 	-------------------------------------- */
@@ -333,7 +336,21 @@
 			// redirect
 				$authentication_manager->forceRedirect('/rumour/' . $publicID . '/' . $parser->seoFriendlySuffix($rumour[0]['description']) . '/' . $keyvalue_array->updateKeyValue($tl->page['parameter3'], 'view', 'comments', '|') . '/success=comment_enabled');
 				
+		} elseif ($_POST['formName'] == 'responseForm' && $logged_in) {
+			/* $new_data = array( */
+			/* 	'updated_on'=>date('Y-m-d H:i:s'), */
+			/* 	// 'response_who'=>$_POST['response_who'], // TODO validate! */
+			/* 	'response_start_date'=>$_POST['response_start_date'], // TODO validate! */
+			/* 	'response_outcomes'=>$_POST['response_outcomes'], // TODO validate! */
+			/* ); */
+
+			/* updateDb('rumours', $new_data, array('rumour_id'=>$rumour[0]['rumour_id']), null, null, null, null, 1); */
+			$responseForm->injest($_POST);
+			if ($responseForm->is_valid()) {
+				$responseForm->save();
+			}
 		}
+		
 		
 	}
 		
@@ -342,6 +359,95 @@
 	-------------------------------------- */
 		
 	else {
+	}
+
+	class ResponseForm {
+		private $rumour;
+		private $relevantUsers;
+		public $data;
+		public $errors;
+
+		private $fields = array(
+			'response_who',
+			'response_start_date',
+			'response_duration_weeks',
+			'response_completion_date',
+			'response_completed',
+			'response_outcomes',
+		);
+
+
+		public function __construct($rumour, $relevantUsers) {
+			$this->rumour = $rumour;
+			$this->relevantUsers = $relevantUsers;
+
+			$this->data = array();
+			$this->injest($this->rumour);
+		}
+
+		public function clean_value($name, $value) {
+			// TODO - switch & clean...
+			switch ($name) {
+			case 'response_who':
+				return $value; // TODO check if in $this->relevantUsers;
+			case 'response_duration_weeks':
+				return ctype_digit($value) ? intval($value) : null;
+			default:
+				return $value;
+			}
+		}
+
+		public function injest($data) {
+			foreach($this->fields as $fieldname) {
+				try {
+					$this->data[$fieldname] = $this->clean_value($fieldname, $data[$fieldname]);
+				} catch (Exception $err) {
+					$this->errors[$fieldname] = $err;
+				}
+			}
+		}
+
+		public function render() {
+			global $form;
+
+			$response_form = '';
+			$response_form .= $form->start('responseForm', '', 'post');
+			$response_form .= $form->row(
+				'select', 'response_who', $this->data['response_who'], false, 'Who:', 'form-control',
+				$this->relevantUsers
+			);
+			// TODO - create a new 'date_with_picker' in tidal_lock/0-5/helpers/class.form.php
+			$response_form .= $form->row(
+				'date', 'response_start_date', $this->data['response_start_date'], false, 'Start Date:', 'form-control'
+			);
+			$response_form .= $form->row(
+				'number', 'response_duration_weeks', $this->data['response_duration_weeks'], false, 'Duration (in weeks):', 'form-control'
+			);
+			$response_form .= $form->row(
+				'date', 'response_completion_date', $this->data['response_completion_date'], false, 'Completion Date:', 'form-control'
+			);
+
+			$response_form .= $form->row(
+				'checkbox', 'response_completed', $this->data['response_completed'], false, 'Completed', ''
+			);
+
+			$response_form .= $form->row(
+				'textarea', 'response_outcomes', $this->data['response_outcomes'], false, 'Outcomes:', 'form-control', $this->relevantUsers);
+
+			$response_form .= '<input type="submit" class="btn btn-info" value="Save"/>';
+
+			$response_form .= $form->end();
+			return $response_form;
+		}
+
+		public function is_valid() {
+			return empty($this->errors);
+		}
+
+		public function save() {
+			updateDb('rumours', $this->data, array('rumour_id'=>$this->rumour['rumour_id']), null, null, null, null, 1);
+		}
+
 	}
 		
 ?>
