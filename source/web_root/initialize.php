@@ -19,6 +19,7 @@
 		$tl->backEndLibraries =		[];
 		$tl->frontEndLibraries =	[];
 		$tl->initialize =			[];
+		$tl->defaultHeaderLogo = '/resources/img/logo.png';
 
 		// autoload configuration files
 			if ($tl->initialize['handle'] = opendir(__DIR__ . '/../config/autoload/.')) {
