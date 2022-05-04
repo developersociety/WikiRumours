@@ -8,6 +8,8 @@ services:
     volumes:
       - ./local_docker_development/.my.cnf:/root/.my.cnf
       - ./local_docker_development/my.cnf:/etc/mysql/conf.d/dev.cnf
+    ports:
+      - 3306:3306
 
   # adminer:
   #   image: adminer
