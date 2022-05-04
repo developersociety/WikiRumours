@@ -9,6 +9,7 @@ COMMIT;
 
 ALTER
     TABLE wr_rumours
+    ADD response_what text COLLATE utf8_unicode_ci NOT NULL,
     ADD response_who int(9) UNSIGNED,
     ADD response_start_date date,
     ADD response_duration_weeks int,
