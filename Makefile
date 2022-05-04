@@ -15,6 +15,14 @@ blank-reset: drop-db create-db # add-local-dev-user
 	mysql -u root wikirumours < db_setup/import_me.sql
 	mysql -u root wikirumours < db_setup/add-dev-user.sql
 
-# Doesn't work, as needs full .htaccess router thing...
-# run:
-# 	cd source/web_root && php -S localhost:8000 initialize.php
+docker-reset:
+	docker-compose exec -T mysql bash -c 'mysqladmin -f -u root drop wikirumours >/dev/null || true'
+	docker-compose exec -T mysql mysqladmin -u root create wikirumours
+	docker-compose exec -T mysql mysql wikirumours < db_setup/wikirumours_msf.sql
+	docker-compose exec -T mysql mysql wikirumours < db_setup/add-dev-user.sql
+
+docker-blank-reset:
+	docker-compose exec -T mysql bash -c 'mysqladmin -f -u root drop wikirumours >/dev/null || true'
+	docker-compose exec -T mysql mysqladmin -u root create wikirumours
+	docker-compose exec -T mysql mysql wikirumours < db_setup/import_me.sql
+	docker-compose exec -T mysql mysql wikirumours < db_setup/add-dev-user.sql
