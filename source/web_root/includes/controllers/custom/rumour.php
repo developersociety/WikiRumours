@@ -387,6 +387,7 @@
 
 		// Which field(names) it should look for in $_POST or the $rumour object:
 		private $fields = array(
+			'response_what',
 			'response_who',
 			'response_start_date',
 			'response_duration_weeks',
@@ -443,6 +444,11 @@
 
 			$response_form = '';
 			$response_form .= $form->start('responseForm', '', 'post');
+
+			$response_form .= $form->row(
+				'textarea', 'response_what', $this->data['response_what'], false, 'What:', 'form-control', null);
+
+
 			$response_form .= $form->row(
 				'select', 'response_who', $this->data['response_who'], false, 'Who:', 'form-control',
 				$this->relevantUsers
@@ -465,7 +471,7 @@
 			$response_form .= $form->row(
 				'textarea', 'response_outcomes', $this->data['response_outcomes'], false, 'Outcomes:', 'form-control', $this->relevantUsers);
 
-			$response_form .= '<input type="submit" class="btn btn-info" value="Save"/>';
+			$response_form .= '<input type="submit" class="btn btn-info pull-right" value="Save"/>';
 
 			$response_form .= $form->end();
 			return $response_form;
