@@ -14,7 +14,7 @@ ALTER
     ADD response_duration_weeks int,
     ADD response_completion_date date,
     ADD response_completed bool NOT NULL default false,
-    ADD response_outcomes text COLLATE utf8_unicode_ci NOT NULL,
+    ADD response_outcomes text COLLATE utf8_unicode_ci NOT NULL
 	-- It would be nice to do:
     --     ADD FOREIGN KEY (response_who) REFERENCES wr_users(user_id)
 	-- but...
