@@ -619,7 +619,7 @@
 						// initialize
 							$dateRegex = "^[0-9]{4}-(((0[13578]|(10|12))-(0[1-9]|[1-2][0-9]|3[0-1]))|(02-(0[1-9]|[1-2][0-9]))|((0[469]|11)-(0[1-9]|[1-2][0-9]|30)))$";
 						// return
-							$field = "<input type='text' name='" . $name . "' id='" . $name . "' placeholder='YYYY-MM-DD' pattern='" . $dateRegex . "'";
+							$field = "<input type='date' name='" . $name . "' id='" . $name . "' placeholder='YYYY-MM-DD' pattern='" . $dateRegex . "'";
 							if ($class) $field .= " class='" . $class . "'";
 							if ($value && $value != '0000-00-00') $field .= " value='" . $value . "' ";
 							if ($otherAttributes) foreach ($otherAttributes as $attribute => $attributeValue) $field .= " " . $attribute . "='" . trim($attributeValue) . "'";
