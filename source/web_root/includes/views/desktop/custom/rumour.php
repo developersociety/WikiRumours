@@ -378,10 +378,6 @@
 			'active' => $filters['view'] === 'response',
 		]);
 
-		renderTemplate('rumours/comment_form.php', [
-			'_POST' => $_POST
-		]);
-
 	echo "</div>\n"; // end of response tab
 
 	// End of all tab pages:
