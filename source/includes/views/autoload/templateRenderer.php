@@ -13,5 +13,5 @@ function renderTemplate($template_name, $context) {
 	// load the context vars into the current function variable symbol table:
 	extract($context);
 	// embed the template.
-	include(__DIR__ . '/../../../../templates/' . $template_name);
+	include(__DIR__ . '/../../../templates/' . $template_name);
 }
