@@ -348,6 +348,8 @@
 			$responseForm->injest($_POST);
 			if ($responseForm->is_valid()) {
 				$responseForm->save();
+			} else {
+				$tl->page['error'] = 'Invalid Response';
 			}
 		}
 		
