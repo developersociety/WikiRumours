@@ -8,5 +8,6 @@
 		); // do not change this if there are existing images
 
     $tl->defaultHeaderLogo = '/resources/img/msf-logo.jpg';
+    $tl->page['protocol'] = 'https://';
 		
 ?>
