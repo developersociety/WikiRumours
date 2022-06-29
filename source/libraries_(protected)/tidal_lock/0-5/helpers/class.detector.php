@@ -71,7 +71,7 @@
 				$this->page['domain'] = substr($this->page['root'], strpos($this->page['root'], '.') + 1); // e.g. mydomain.com
 			}
 			
-			if (@$_SERVER['HTTPS']) $this->page['protocol'] = 'https://';
+			if (@$_SERVER['HTTPS'] || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')) $this->page['protocol'] = 'https://';
 			else $this->page['protocol'] = 'http://';
 				/*
 				 	This isn't a definitive test, and is dependent on proper server configuration. If it's failing, you should
