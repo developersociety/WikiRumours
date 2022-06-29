@@ -1,8 +1,8 @@
 <?php
 
 		$tl->salts = [
-			'password' => '',
-			'public_keys' => ''
+			'password' => getenv("ENC_PASSWORD"),
+			'public_keys' => getenv("ENC_PUBKEY")
 		];
 
 		

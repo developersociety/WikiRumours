@@ -7,7 +7,7 @@
 		"User" =>				getenv("SMTP_USERNAME"),
 		"Password" =>			getenv("SMTP_PASSWORD"),
 		"OutgoingAddress" =>	getenv("SMTP_SENDER_EMAIL"),
-		"IncomingAddress" =>	"",
+		"IncomingAddress" =>	getenv("SMTP_SENDER_EMAIL"),
 		"AddressForBackups" =>	""
 	];
 		
