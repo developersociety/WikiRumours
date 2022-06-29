@@ -4,7 +4,7 @@
 
 		// back up database
 
-			$destinationPath = __DIR__ . '/../../../backups/db';
+			$destinationPath = __DIR__ . '/../backups/db';
 			
 			// if destination path doesn't exist, stop
 				if (!file_exists($destinationPath)) {
@@ -68,12 +68,12 @@
 
 			$folders = [
 				'vault' => 'vault',
-				'uploads' => 'web_root/uploads'
+				'uploads' => 'uploads'
 			];
 
 			foreach ($folders as $folderName =>$folderPath) {
 
-				$destinationPath = __DIR__ . '/../../../backups/' . $folderName;
+				$destinationPath = __DIR__ . '/../backups/' . $folderName;
 				
 				// if destination path doesn't exist, stop
 					if (!file_exists($destinationPath)) {
