@@ -473,6 +473,7 @@
 			'response_completion_date',
 			'response_completed',
 			'response_outcomes',
+			'response_uploads',
 		];
 
 		public function __construct($rumour, $relevantUsers) {
@@ -480,6 +481,7 @@
 			$this->relevantUsers = $relevantUsers;
 
 			$this->data = array();
+			$this->data['response_uploads'] = [];
 			$this->injest($this->rumour);
 		}
 
@@ -520,6 +522,7 @@
 			$response_form .= $this->render_field('response_completion_date', 'date', 'Completion Date:');
 			$response_form .= $this->render_field('response_completed', 'checkbox', 'Completed', '');
 			$response_form .= $this->render_field('response_outcomes', 'textarea', 'Outcomes:');
+			$response_form .= $this->render_field('response_uploads', 'file_dropzone', 'Uploads:', 'form-control',  [null, null, ['destination_path' => '/tmp/TODO/']]);
 
 			// TODO - create a new 'date_with_picker' in tidal_lock/0-5/helpers/class.form.php
 
