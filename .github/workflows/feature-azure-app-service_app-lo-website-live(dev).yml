@@ -37,6 +37,7 @@ jobs:
           name: php-app
           path: |
             source/web_root/
+            source/cron
 
   deploy:
     runs-on: ubuntu-latest
