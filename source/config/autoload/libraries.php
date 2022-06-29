@@ -8,6 +8,15 @@ $tl->backEndLibraries = [
     'phpass' => array(
         'local_path' => 'phpass/phpass_0-3/PasswordHash.php',
     ),
+    'phpmailer' => array(
+        'local_path' => 'phpmailer/phpmailer_6-07/src/PHPMailer.php',
+    ),
+    'phpmailerexception' => array(
+        'local_path' => 'phpmailer/phpmailer_6-07/src/Exception.php',
+    ),
+    'phpmailersmtp' => array(
+        'local_path' => 'phpmailer/phpmailer_6-07/src/SMTP.php',
+    ),
 
 ];
 
