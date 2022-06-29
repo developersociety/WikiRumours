@@ -363,12 +363,27 @@
 	else {
 	}
 
-	class ResponseForm {
+	class BaseForm {
 		/*
 		 * A Form class, kind of how django does it - keeping the rendering, saving, parsing,
 		 * cleaning & validation all together.
 		 *
-		 * Usage:
+		 * Usage eg.:
+		 *
+		 * class ResponseForm extends BaseForm {
+		 *		public $fields = ['foo', 'bar', 'baz'];
+		 *		public function render() {
+		 *		    global $form;
+		 *		    $html = $form->start();
+		 *		    $html .= $form->row('foo', 'text');
+		 *		    $html .= $form->row('bar', 'text');
+		 *		    $html .= $form->row('baz', 'text');
+		 *		    $html .= $form->end();
+		 *		    return $html
+		 *		}
+		 * }
+		 * 
+		 *
 		 * $responseForm =new ResponseForm($rumour, $allValidUsersForDropDown);
 		 * if (is a POST response) {
 		 *		$responseForm->injest($_POST);
@@ -382,13 +397,69 @@
 		 * ...
 		 *
 		 * */
-		private $rumour;
-		private $relevantUsers;
 		public $data;
 		public $errors;
+		public $fields = array();
+
+		public function injest($data) {
+			/* Given an key => value array, load all known fields into $this->data,
+			 * storing any errors.
+			 */
+			foreach($this->fields as $fieldname) {
+				try {
+					$cleaner = "clean_${fieldname}";
+					if (method_exists($this, $cleaner)) {
+						$this->data[$fieldname] = $this->{$cleaner}($data[$fieldname]);
+					} else {
+						$this->data[$fieldname] = $data[$fieldname];
+					}
+				} catch (Exception $err) {
+					$this->errors[$fieldname] = $err;
+					$this->data[$fieldname] = $data[$fieldname];
+				}
+			}
+			if (method_exists($this, 'clean')) {
+				try {
+					$this->clean($data);
+				} catch (Exception $err) {
+					$this->errors['__all__'] = $err;
+				}
+			}
+		}
+		public function render_error($fieldname) {
+			if (!isset($this->errors[$fieldname])) { return ''; }
+
+			$err = $this->errors[$fieldname];
+			if ($err) {
+				return '<div class="alert alert-danger">' . $err->getMessage() . '</div>';
+			}
+		}
+
+		public function render_field($fieldname, $fieldtype, $label=null, $css_class='form-control ', $extra_args=array()) {
+			/*
+			 * Render a form field with the current data, and include any error messages.
+			 */
+
+			global $form; // the CMS form renderer...
+
+			return $form->row(
+				$fieldtype, $fieldname, $this->data[$fieldname], false, $label?:$fieldname, $css_class, ...$extra_args
+			) . $this->render_error($fieldname);
+
+		}
+
+		public function is_valid() {
+			return empty($this->errors);
+		}
+	}
+
+
+	class ResponseForm extends BaseForm {
+		private $rumour;
+		private $relevantUsers;
 
 		// Which field(names) it should look for in $_POST or the $rumour object:
-		private $fields = array(
+		public $fields = [
 			'response_what',
 			'response_who',
 			'response_start_date',
@@ -396,8 +467,7 @@
 			'response_completion_date',
 			'response_completed',
 			'response_outcomes',
-		);
-
+		];
 
 		public function __construct($rumour, $relevantUsers) {
 			$this->rumour = $rumour;
@@ -407,33 +477,15 @@
 			$this->injest($this->rumour);
 		}
 
-		public function clean_value($name, $value) {
-			/*
-			 * Every field gets dropped through this function.
-			 * Raise an exception if you want it to show up as an error.
-			 * */
-			// TODO - switch & clean...
-			switch ($name) {
-			case 'response_who':
-				return $value; // TODO check if in $this->relevantUsers;
-			case 'response_duration_weeks':
-				return ctype_digit($value) ? intval($value) : null;
-			default:
-				return $value;
+		public function clean_response_who($value) {
+			if ($value && !array_key_exists($value, $this->relevantUsers)) {
+				throw new Exception("Not a valid user!");
 			}
+			return $value;
 		}
-
-		public function injest($data) {
-			/* Given an key => value array, load all known fields into $this->data,
-			 * storing any errors.
-			 */
-			foreach($this->fields as $fieldname) {
-				try {
-					$this->data[$fieldname] = $this->clean_value($fieldname, $data[$fieldname]);
-				} catch (Exception $err) {
-					$this->errors[$fieldname] = $err;
-				}
-			}
+		public function clean_response_duration_weeks($value) {
+			# only parse to positive int:
+			return ctype_digit($value) ? intval($value) : null;
 		}
 
 		public function render() {
@@ -447,40 +499,28 @@
 			$response_form = '';
 			$response_form .= $form->start('responseForm', '', 'post');
 
-			$response_form .= $form->row(
-				'textarea', 'response_what', $this->data['response_what'], false, 'What:', 'form-control', null);
+			if (!$this->is_valid()) {
+				$response_form .= '<div class="alert alert-danger">Please correct the following errors.</div>';
+				if (isset($this->errors['__all__'])) {
+					$response_form .= '<div class="alert alert-danger">' . $this->errors['__all__'].getMessage() . '</div>';
+				}
 
+			}
 
-			$response_form .= $form->row(
-				'select', 'response_who', $this->data['response_who'], false, 'Who:', 'form-control',
-				$this->relevantUsers
-			);
+			$response_form .= $this->render_field('response_what', 'textarea', 'What:');
+			$response_form .= $this->render_field('response_who', 'select', 'Who:', 'form-control select2', [$this->relevantUsers]);
+			$response_form .= $this->render_field('response_start_date', 'date', 'Start Date:');
+			$response_form .= $this->render_field('response_duration_weeks', 'number', 'Duration (in weeks):');
+			$response_form .= $this->render_field('response_completion_date', 'date', 'Completion Date:');
+			$response_form .= $this->render_field('response_completed', 'checkbox', 'Completed', '');
+			$response_form .= $this->render_field('response_outcomes', 'textarea', 'Outcomes:');
+
 			// TODO - create a new 'date_with_picker' in tidal_lock/0-5/helpers/class.form.php
-			$response_form .= $form->row(
-				'date', 'response_start_date', $this->data['response_start_date'], false, 'Start Date:', 'form-control'
-			);
-			$response_form .= $form->row(
-				'number', 'response_duration_weeks', $this->data['response_duration_weeks'], false, 'Duration (in weeks):', 'form-control'
-			);
-			$response_form .= $form->row(
-				'date', 'response_completion_date', $this->data['response_completion_date'], false, 'Completion Date:', 'form-control'
-			);
-
-			$response_form .= $form->row(
-				'checkbox', 'response_completed', $this->data['response_completed'], false, 'Completed', ''
-			);
-
-			$response_form .= $form->row(
-				'textarea', 'response_outcomes', $this->data['response_outcomes'], false, 'Outcomes:', 'form-control', $this->relevantUsers);
 
 			$response_form .= '<input type="submit" class="btn btn-info pull-right" value="Save"/>';
 
 			$response_form .= $form->end();
 			return $response_form;
-		}
-
-		public function is_valid() {
-			return empty($this->errors);
 		}
 
 		public function save() {
