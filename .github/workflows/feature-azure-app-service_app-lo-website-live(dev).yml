@@ -31,13 +31,14 @@ jobs:
         if: steps.check_files.outputs.files_exists == 'true'
         run: composer validate --no-check-publish && composer install --prefer-dist --no-progress
 
+      - name: Move
+        run: mv source/web_root/* source/web_root/.* source/ || true
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2
         with:
           name: php-app
-          path: |
-            source/web_root/
-            source/cron
+          path: source/
 
   deploy:
     runs-on: ubuntu-latest

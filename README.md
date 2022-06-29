@@ -56,9 +56,18 @@ full instance of WikiRumours.
   db_setup folder. Consider using a unique prefix for your
   table names.
 
-- Rename the folder "source/config_(rename)" as "source/config".
-
-- Update the files in the source/config folder.
+- Set environment variables to integrations:
+  - DB_HOST is hostname or IP address of MySQL database server,
+  - DB_DATABASE database/schema name to use,
+  - DB_USERNAME user name to authenticate with database,
+  - DB_PASSWORD password to authenticate with database,
+  - DB_ENV_TYPE possible values are production, staging, and dev,
+  - DB_TAB_PREFIX prefix to apply to all tables,
+  - SMTP_HOST smtp server name or IP,
+  - SMTP_PORT port on smtp server (prefer secure 465, 587),
+  - SMTP_USERNAME authentication username,
+  - SMTP_PASSWORD authentication password,
+  - SMTP_SENDER_EMAIL sender's email address
 
 - Copy the files over to your web server and point the root of
   your virtual domain at the folder source/web_root.
@@ -75,6 +84,8 @@ full instance of WikiRumours.
 
 - Go to the new site through a browser and register. The first
   user to register automatically becomes an administrator.
+
+- When deploying to Azure App Service set startup script to /home/startup.sh.
 
 # Customization
 
