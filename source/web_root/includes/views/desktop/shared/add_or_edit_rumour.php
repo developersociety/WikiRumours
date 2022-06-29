@@ -19,7 +19,7 @@
 		/* Status */		echo $form->row('select', 'status_id', $operators->firstTrue(@$_POST['status_id'], @$rumour[0]['status_id']), true, 'Status', 'form-control', $rumourStatuses);
 		/* Findings */		echo $form->row('textarea', 'findings', $operators->firstTrue(@$_POST['findings'], @$rumour[0]['findings']), false, 'Findings', 'form-control', null, null, array('rows'=>'5'));
 		/* Priority */		echo $form->row('select', 'priority_id', $operators->firstTrue(@$_POST['priority_id'], @$rumour[0]['priority_id']), true, 'Priority', 'form-control', $rumourPriorities);
-		/* Assigned to */	echo $form->row('select', 'assigned_to', $operators->firstTrue(@$_POST['assigned_to'], @$rumour[0]['assigned_to']), false, 'Assigned to', 'form-control', $allModeratorsAndCommunityLiaisons);
+		/* Assigned to */	echo $form->row('select', 'assigned_to', $operators->firstTrue(@$_POST['assigned_to'], @$rumour[0]['assigned_to']), false, 'Assigned to', 'form-control select2', $allModeratorsAndCommunityLiaisons);
 		/* Verified with */	echo $form->row('text', 'verified_with', $operators->firstTrue(@$_POST['verified_with'], @$rumour[0]['verified_with']), false, "<a href='javascript:void(0)' class='tooltips' onClick='return false' data-toggle='tooltip' title='Information entered in this field will never be visible to anyone other than moderators, community liaisons and administrators.'>Verified with</a>", 'form-control', null, 255);
 		/* Attachments */	echo $form->rowStart('evidence', "Photographic evidence and other file attachments");
 							echo "  " . $form->input('file_dropzone', 'evidence', null, false, null, 'form-control', null, null, array('message'=>"Drag or click here to upload...", 'destination_path'=>'trash/' . date('Y-m-d_H-i-s', mktime(date('H'), date('i'), date('s'), date('m'), date('d') + 1, date('Y'))), 'acceptable_mime_types'=>'image/jpg,image/jpeg,image/png,image/gif,application/pdf', 'thumbnail_width'=>100, 'thumbnail_height'=>100));
@@ -71,7 +71,7 @@
 
 	/* Tags */				if (!@$matchingRumour) echo $form->row('select', 'tags', $operators->firstTrue(@$currentTags, @$suggestedTags), false, 'Tags', 'select2', $allTags, null, array('multiple'=>'multiple', 'data-tags'=>'true'));
 
-	/* Country occurred */		if (($tl->page['template'] == 'rumour_add' && !$matchingRumour) || ($tl->page['template'] == 'rumour_edit' && $logged_in['is_administrator'] && $logged_in['can_edit_content'])) echo $form->row('country', 'country', $operators->firstTrue(@$_POST['country'], @$rumour[0]['country_id']), false, 'Country occurred', 'form-control');
+	/* Country occurred */		if (($tl->page['template'] == 'rumour_add' && !$matchingRumour) || ($tl->page['template'] == 'rumour_edit' && $logged_in['is_administrator'] && $logged_in['can_edit_content'])) echo $form->row('country', 'country', $operators->firstTrue(@$_POST['country'], @$rumour[0]['country_id']), false, 'Country occurred', 'form-control select2');
 								else echo $form->row('uneditable_static', 'country', @$rumour[0]['country'], false, 'Country occurred');
 	/* Area occurred */			if (($tl->page['template'] == 'rumour_add' && !$matchingRumour) || ($tl->page['template'] == 'rumour_edit' && $logged_in['is_administrator'] && $logged_in['can_edit_content'])) {
 									echo $form->row('text', 'city', $operators->firstTrue(@$_POST['city'], @$rumour[0]['city']), false, 'Area occurred', 'form-control', null, 50);

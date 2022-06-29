@@ -152,8 +152,8 @@
 							foreach ($_POST['file_evidence'] as $uploadedFile) {
 								$filename = substr($uploadedFile, strrpos($uploadedFile, '/') + 1);
 								$uploadedFile = __DIR__ . '/../../../../' . $uploadedFile;
-								$destinationPath = 'uploads/rumour_attachments/' . $publicID;
-								if (!file_exists($destinationPath)) mkdir($destinationPath);
+								$destinationPath = __DIR__ . '/../../../uploads/rumour_attachments/' . $publicID;
+								if (!file_exists($destinationPath)) mkdir($destinationPath, 0777, true);
 								$success = rename($uploadedFile, $destinationPath . '/' . $filename);
 								if (!$success || !file_exists($destinationPath . '/' . $filename)) $tl->page['error'] .= "Unable to retrieve uploaded file for some reason. ";
 							}

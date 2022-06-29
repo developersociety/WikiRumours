@@ -450,7 +450,7 @@
 
 
 			$response_form .= $form->row(
-				'select', 'response_who', $this->data['response_who'], false, 'Who:', 'form-control',
+				'select', 'response_who', $this->data['response_who'], false, 'Who:', 'form-control select2',
 				$this->relevantUsers
 			);
 			// TODO - create a new 'date_with_picker' in tidal_lock/0-5/helpers/class.form.php
