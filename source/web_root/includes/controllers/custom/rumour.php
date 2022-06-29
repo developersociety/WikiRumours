@@ -443,7 +443,13 @@
 			global $form; // the CMS form renderer...
 
 			return $form->row(
-				$fieldtype, $fieldname, $this->data[$fieldname], false, $label?:$fieldname, $css_class, ...$extra_args
+				$fieldtype, // type
+				$fieldname, // name
+				$this->data[$fieldname], // value
+				false, // mandatory
+				$label?:$fieldname, // label
+				$css_class, // css class
+				...$extra_args // options, max_length, otherAttributes, truncateLabel, eventHandlers
 			) . $this->render_error($fieldname);
 
 		}
