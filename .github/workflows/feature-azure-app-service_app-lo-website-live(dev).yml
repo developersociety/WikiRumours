@@ -32,7 +32,7 @@ jobs:
         run: composer validate --no-check-publish && composer install --prefer-dist --no-progress
 
       - name: Move
-        run: mv source/web_root/* source/web_root/.* source/ || true
+        run: mv source/web_root/* source/web_root/.* source/ || true ; rm -fr source/web_root
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2

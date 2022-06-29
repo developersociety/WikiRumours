@@ -1,7 +1,5 @@
 $ cat .gitignore
 
-config/*
-
 web_root/assets/cms_files/*
 web_root/assets/photo_evidence/*
 web_root/assets/profile_images/*
