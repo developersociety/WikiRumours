@@ -193,7 +193,7 @@
 			// Autoload global arrays
 				if ($tl->initialize['handle'] = opendir(__DIR__ . '/global_arrays/.')) {
 					while (false !== ($tl->initialize['file'] = readdir($tl->initialize['handle']))) {
-						if (substr_count($tl->initialize['file'], '.php') > 0) include __DIR__ . '/../global_arrays/' . $tl->initialize['file'];
+						if (substr_count($tl->initialize['file'], '.php') > 0) include __DIR__ . '/global_arrays/' . $tl->initialize['file'];
 					}
 					closedir($tl->initialize['handle']);
 				}
