@@ -1,3 +1,9 @@
+# front door protection
+AuthType Basic
+AuthName Restricted
+AuthUserFile /home/site/wwwroot/.htpasswd
+Require valid-user
+
 RewriteEngine on
 RewriteBase /
 # RewriteCond %{HTTPS} !=on
