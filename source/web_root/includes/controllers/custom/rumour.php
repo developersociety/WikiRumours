@@ -577,13 +577,13 @@
 			 * links, with "[x] Delete" checkboxes and filenames, suitable for use with 
 			 * delete_selected_uploaded_files
 			 * */
-			$html = "<ul>";
+			$html = '<ul class="list-group">';
 			foreach ($attachments as $index => $attachment) {
 				$filename = basename($attachment);
-				$html .= '<li>';
-				$html .= '<input type="checkbox" name="delete_' . $field_name . '_' . $index . '"> Delete</input> ';
+				$html .= '<li class="list-group-item">';
 				$html .= '<input type="hidden" name="delete_' . $field_name . '_filepath_' . $index . '" value="' . $filename . '">';
 				$html .= '<a target=_"blank" href="' . $attachments_base_url . $filename . '">' . $filename . '</a>';
+				$html .= '<span class="pull-right"><input type="checkbox" name="delete_' . $field_name . '_' . $index . '"> Delete</input></span>';
 				$html .= '</li>';
 			}
 			$html .= "</ul>";
@@ -658,8 +658,8 @@
 			$response_form .= $this->render_field('response_what', 'textarea', 'What:');
 			$response_form .= $this->render_field('response_who', 'select', 'Who:', 'form-control select2', [$this->relevantUsers]);
 			$response_form .= $this->render_field('response_start_date', 'date', 'Start Date:');
-			$response_form .= $this->render_field('response_duration_weeks', 'number', 'Duration (in weeks):');
-			$response_form .= $this->render_field('response_completion_date', 'date', 'Completion Date:');
+			/* $response_form .= $this->render_field('response_duration_weeks', 'number', 'Duration (in weeks):'); */
+			/* $response_form .= $this->render_field('response_completion_date', 'date', 'Completion Date:'); */
 			$response_form .= $this->render_field('response_outcomes', 'textarea', 'Intended Outcomes:');
 			$response_form .= $this->render_field('response_completed', 'checkbox', 'Completed', '');
 			$response_form .= $this->render_field('response_uploads', 'file_dropzone', 'Uploads:', 'form-control',
@@ -668,12 +668,15 @@
 
 			$current_attachments = $this->get_attachments($this->upload_files_dir);
 			if ($current_attachments) {
-				$response_form .= "<h4>Current attachments:</h4>";
+				$response_form .= '<div class="form-group">';
+				$response_form .= '<label class="col-lg-3 col-md-3 col-sm-4 col-xs-12 control-label sr-only">Current attachments:</label>';
+				$response_form .= '<div class="col-lg-9 col-md-9 col-sm-8 col-xs-12">';
 				$response_form .= $this->render_attachments_list(
 					'response_uploads', // base field_name
 					$current_attachments, // attachment files
 					'/uploads/rumour_response_attachments/'  . $this->rumour['public_id'] . '/' // URL base for files
 				);
+				$response_form .= '</div></div>';
 			}
 
 			// TODO - create a new 'date_with_picker' in tidal_lock/0-5/helpers/class.form.php
