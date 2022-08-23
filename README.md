@@ -47,6 +47,15 @@ You should then be able to visit the site at http://localhost/ (127.0.0.1)
 ?>
 ```
 
+
+# Local migrations:
+
+You can run the database migrations manually locally with
+
+```shell
+	mysql -u root wikirumours < source/db_migrations/migration_name.sql
+```
+
 # Setup and installation
 
 The following steps are required to install and start using an
