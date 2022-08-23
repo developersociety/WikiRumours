@@ -447,10 +447,6 @@
 			/* 	$this->data[$fieldname] = ['post_path']; */
 			/* } */
 
-			$tl->page['console'] .= $fieldname .  ' = ' . json_encode($extra_args) . "\n";
-
-			
-
 			return $form->row(
 				$fieldtype, // type
 				$fieldname, // name
@@ -469,7 +465,119 @@
 	}
 
 
-	class ResponseForm extends BaseForm {
+	class BaseFormWithUploads extends BaseForm {
+		public $temporary_upload_files_dir;
+		public $temporary_upload_files_abspath;
+		
+		public function get_attachments($uploadsPath) {
+			/* Helper method to return list of files in a path. */
+			global $directory_manager;
+
+			if (file_exists($uploadsPath)) {
+				return $directory_manager->read($uploadsPath , false, false, true);
+			} else {
+				return [];
+			}
+
+		}
+
+
+		public function save_uploads($field_name, $destinationPath) {
+			/*
+			 * Given a base $field_name, and location to save new files to,
+			 * find all the files which have been uploaded to the `temporary_upload_files_dir`
+			 * and move them to $destinationPath.
+			 * */
+
+			global $tl;
+			// Uses $_POST directly...
+
+			if (@$_POST['file_' . $field_name]) {
+				foreach ($_POST['file_' . $field_name] as $uploadedFile) {
+					$filename = basename($uploadedFile);
+					$uploadedFile = $this->temporary_upload_files_abspath . '/' . $filename;
+
+					// Create directory for this rumour, if required:
+					if (!file_exists($destinationPath)) {
+						mkdir($destinationPath);
+					}
+					// Try to move the file into that directory:
+					$success = rename($uploadedFile, $destinationPath . '/' . $filename);
+					if (!$success || !file_exists($destinationPath . '/' . $filename)) {
+						$tl->page['error'] .= "Unable to retrieve uploaded file for some reason. ";
+					}
+				}
+			}
+		}
+
+		public function delete_selected_uploaded_files($field_name, $uploadsPath) {
+			/* 
+			 * Given a base $field_name, and a location where uploads are stored,
+			 * delete any uploaded files which are mentioned by `delete_${field_name}_...` fields.
+			 *
+			 * Use with $this->render_attachments_list to generate correct HTML fields.
+			 * */
+			global $directory_manager;
+			global $tl;
+			// Uses $_POST directly...
+			
+			// TODO - should this actually move them to a trash dir instead of deleting?
+
+			if (file_exists($uploadsPath)) {
+				$attachments = $directory_manager->read($uploadsPath, false, false, true);
+
+				if (count($attachments)) {
+					for ($counter = 0; $counter < count($attachments); $counter++) {
+						$should_delete_attachment = isset($_POST['delete_'. $field_name .'_' . $counter]);
+						$attachment_filepath = $_POST['delete_'. $field_name .'_filepath_' . $counter];
+						$attachment_filepath = basename($attachment_filepath);
+
+						if (!strlen($attachment_filepath)) {
+							$tl->page['error'] .= "Unable to delete an attachment. " . $attachment_filepath;
+							continue;
+						}
+
+						$attachment_filepath = $uploadsPath . $attachment_filepath;
+
+						if (!is_file($attachment_filepath)) {
+							$tl->page['error'] .= "Unable to delete an attachment. " . $attachment_filepath;
+							continue;
+						}
+
+						if ($should_delete_attachment) {
+							$success = @unlink ($attachment_filepath);
+							if (!$success || file_exists($attachment_filepath)) {
+								$tl->page['error'] .= "Unable to delete attachment: " . $attachment_filepath;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		function render_attachments_list($field_name, $attachments, $attachments_base_url) {
+			/* 
+			 * Given a base $field_name, a list of $attachments (file names) and the base URL
+			 * where user-facing links to the downloads should go, generate a list of attachment
+			 * links, with "[x] Delete" checkboxes and filenames, suitable for use with 
+			 * delete_selected_uploaded_files
+			 * */
+			$html = "<ul>";
+			foreach ($attachments as $index => $attachment) {
+				$filename = basename($attachment);
+				$html .= '<li>';
+				$html .= '<input type="checkbox" name="delete_' . $field_name . '_' . $index . '"> Delete</input> ';
+				$html .= '<input type="hidden" name="delete_' . $field_name . '_filepath_' . $index . '" value="' . $filename . '">';
+				$html .= '<a target=_"blank" href="' . $attachments_base_url . $filename . '">' . $filename . '</a>';
+				$html .= '</li>';
+			}
+			$html .= "</ul>";
+
+			return $html;
+		}
+	}
+
+	class ResponseForm extends BaseFormWithUploads {
 		private $rumour;
 		private $relevantUsers;
 
@@ -544,20 +652,15 @@
 			$response_form .= $this->render_field('response_uploads', 'file_dropzone', 'Uploads:', 'form-control',
 				[null, null, ['destination_path' => $this->temporary_upload_files_dir]]
 			);
-			$current_attachments = $this->get_attachments();
+
+			$current_attachments = $this->get_attachments($this->upload_files_dir);
 			if ($current_attachments) {
 				$response_form .= "<h4>Current attachments:</h4>";
-				$response_form .= "<ul>";
-				$uploads_path = '/uploads/rumour_response_attachments/' . $this->rumour['public_id'] . '/';
-				foreach ($current_attachments as $index => $attachment) {
-					$filename = basename($attachment);
-					$response_form .= '<li>';
-					$response_form .= '<input type="checkbox" name="delete_response_uploads_' . $index . '"> Delete</input> ';
-					$response_form .= '<input type="hidden" name="delete_response_uploads_filepath_' . $index . '" value="' . $filename . '">';
-					$response_form .= '<a href="' . $uploads_path . $filename . '">' . $filename . '</a>';
-					$response_form .= '</li>';
-				}
-				$response_form .= "</ul>";
+				$response_form .= $this->render_attachments_list(
+					'response_uploads', // base field_name
+					$current_attachments, // attachment files
+					'/uploads/rumour_response_attachments/'  . $this->rumour['public_id'] . '/' // URL base for files
+				);
 			}
 
 			// TODO - create a new 'date_with_picker' in tidal_lock/0-5/helpers/class.form.php
@@ -571,90 +674,15 @@
 		public function save() {
 			$response_uploads = $this->data['response_uploads'];	
 			// First delete any files which have been selected for deletion:
-			$this->delete_selected_uploaded_files();
+			$this->delete_selected_uploaded_files('response_uploads', $this->upload_files_dir);
 			// And now move in any new files from the temporary upload directory:
-			$this->save_uploads();
+			$this->save_uploads(
+				'response_uploads', // field name
+				$this->upload_files_dir // destinationPath
+			);
 			unset($this->data['response_uploads']);
 			updateDb('rumours', $this->data, array('rumour_id'=>$this->rumour['rumour_id']), null, null, null, null, 1);
 			$this->data['response_uploads'] = $response_uploads;
 
-
 		}
-
-		public function get_attachments() {
-			global $directory_manager;
-
-			if (file_exists($this->upload_files_dir)) {
-				return $directory_manager->read($this->upload_files_dir , false, false, true);
-			} else {
-				return [];
-			}
-
-		}
-
-
-		public function save_uploads() {
-			global $directory_manager;
-			global $tl;
-			// Uses $_POST directly...
-
-			if (@$_POST['file_response_uploads']) {
-				foreach ($_POST['file_response_uploads'] as $uploadedFile) {
-					$filename = basename($uploadedFile);
-					$uploadedFile = $this->temporary_upload_files_abspath . '/' . $filename;
-					$destinationPath = 'uploads/rumour_response_attachments/' . $this->rumour['public_id'];
-
-					// Create directory for this rumour, if required:
-					if (!file_exists($destinationPath)) {
-						mkdir($destinationPath);
-					}
-					// Try to move the file into that directory:
-					$success = rename($uploadedFile, $destinationPath . '/' . $filename);
-					if (!$success || !file_exists($destinationPath . '/' . $filename)) {
-						$tl->page['error'] .= "Unable to retrieve uploaded file for some reason. ";
-					}
-				}
-			}
-		}
-
-		public function delete_selected_uploaded_files() {
-			global $directory_manager;
-			global $tl;
-			// Uses $_POST directly...
-			
-			// TODO - should this actually move them to a trash dir instead of deleting?
-
-			if (file_exists($this->upload_files_dir)) {
-				$attachments = $directory_manager->read($this->upload_files_dir, false, false, true);
-
-				if (count($attachments)) {
-					for ($counter = 0; $counter < count($attachments); $counter++) {
-						$should_delete_attachment = isset($_POST['delete_response_uploads_' . $counter]);
-						$attachment_filepath = $_POST['delete_response_uploads_filepath_' . $counter];
-						$attachment_filepath = basename($attachment_filepath);
-
-						if (!strlen($attachment_filepath)) {
-							$tl->page['error'] .= "Unable to delete an attachment. " . $attachment_filepath;
-							continue;
-						}
-
-						$attachment_filepath = $this->upload_files_dir . $attachment_filepath;
-
-						if (!is_file($attachment_filepath)) {
-							$tl->page['error'] .= "Unable to delete an attachment. " . $attachment_filepath;
-							continue;
-						}
-
-						if ($should_delete_attachment) {
-							$success = @unlink ($attachment_filepath);
-							if (!$success || file_exists($attachment_filepath)) {
-								$tl->page['error'] .= "Unable to delete attachment: " . $attachment_filepath;
-							}
-						}
-					}
-				}
-			}
-
-		}
-
 	}
