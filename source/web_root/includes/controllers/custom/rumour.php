@@ -601,8 +601,8 @@
 			'response_what',
 			'response_who',
 			'response_start_date',
-			'response_duration_weeks',
-			'response_completion_date',
+			/* 'response_duration_weeks', */
+			/* 'response_completion_date', */
 			'response_completed',
 			'response_outcomes',
 			'response_uploads',
@@ -626,6 +626,20 @@
 			$FILE_UPLOAD_PATH = '/srv/web_root/uploads';
 			$this->upload_files_dir = $FILE_UPLOAD_PATH . '/rumour_response_attachments/' . $this->rumour['public_id'] . '/';
 
+		}
+
+		public function is_empty() {
+			/* Used by tab header to ask if there's any data here... */
+			foreach($this->data as $row) {
+				if ($row) {
+					return False;
+				}
+				if ($this->get_attachments($this->upload_files_dir)) {
+					return False;
+				}
+			}
+				
+			return True;
 		}
 
 		public function clean_response_who($value) {
@@ -662,7 +676,7 @@
 			/* $response_form .= $this->render_field('response_completion_date', 'date', 'Completion Date:'); */
 			$response_form .= $this->render_field('response_outcomes', 'textarea', 'Intended Outcomes:');
 			$response_form .= $this->render_field('response_completed', 'checkbox', 'Completed', '');
-			$response_form .= $this->render_field('response_uploads', 'file_dropzone', 'Uploads:', 'form-control',
+			$response_form .= $this->render_field('response_uploads', 'file_dropzone', 'Attachments:', 'form-control',
 				[null, null, ['destination_path' => $this->temporary_upload_files_dir]]
 			);
 
