@@ -466,8 +466,23 @@
 
 
 	class BaseFormWithUploads extends BaseForm {
+		/* 
+		 * This extends the BaseForm with functionality for handling file uploads & deletions,
+		 * using the same system as the rest of the site, but hopefully a bit cleaner / more
+		 * re-usable logic.
+		 *
+		 * Files are uploaded initially to the `$this->temporary_upload_files_dir` - and then
+		 * moved into a final uploads path (can be different per field).
+		 *
+		 * To handle deleting, a list of delete checkboxes & hidden fields are added
+		 * to the form - with names which tie them together so the logic here knows which
+		 * selected files should be deleted.
+		 *
+		 * */
 		public $temporary_upload_files_dir;
 		public $temporary_upload_files_abspath;
+		// TODO - Could having a single temporary_upload_files_dir be a problem with
+		//        multiple files with the same name being uploaded to different fields???
 		
 		public function get_attachments($uploadsPath) {
 			/* Helper method to return list of files in a path. */
@@ -630,8 +645,6 @@
 			 */
 			global $form; // the CMS form renderer...
 
-			// TODO - for each field display any errors.
-
 			$response_form = '';
 			$response_form .= $form->start('responseForm', '', 'post');
 			if (!$this->is_valid()) {
@@ -647,8 +660,8 @@
 			$response_form .= $this->render_field('response_start_date', 'date', 'Start Date:');
 			$response_form .= $this->render_field('response_duration_weeks', 'number', 'Duration (in weeks):');
 			$response_form .= $this->render_field('response_completion_date', 'date', 'Completion Date:');
+			$response_form .= $this->render_field('response_outcomes', 'textarea', 'Intended Outcomes:');
 			$response_form .= $this->render_field('response_completed', 'checkbox', 'Completed', '');
-			$response_form .= $this->render_field('response_outcomes', 'textarea', 'Outcomes:');
 			$response_form .= $this->render_field('response_uploads', 'file_dropzone', 'Uploads:', 'form-control',
 				[null, null, ['destination_path' => $this->temporary_upload_files_dir]]
 			);
