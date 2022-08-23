@@ -5,7 +5,7 @@
 		echo "  <li" . ($filters['view'] == 'rumour' ? " class='active'" : false) . "><a href='#rumour' data-toggle='tab'>Rumour</a></li>\n";
 		echo "  <li" . ($filters['view'] == 'sightings' ? " class='active'" : false) . "><a href='#sightings' data-toggle='tab' onClick='if (!mapLoaded) populateMap();'>Sightings (" . count($sightings) . ")</a></li>\n";
 		echo "  <li" . ($filters['view'] == 'comments' ? " class='active'" : false) . "><a href='#comments' data-toggle='tab'>Comments" . (@$numberOfComments ? " (" . $numberOfComments . ")" : false) . "</a></li>\n";
-		echo "  <li" . ($filters['view'] == 'response' ? " class='active'" : false) . "><a href='#response' data-toggle='tab'>Response" . ($responseForm->is_valid()?'':'❗️'). "</a></li>";
+		echo "  <li" . ($filters['view'] == 'response' ? " class='active'" : false) . "><a href='#response' data-toggle='tab'>Follow Up" . ($responseForm->is_valid()?'':'❗️'). "</a></li>";
 		echo "</ul><br />\n\n";
 
 	echo "<div class='tab-content'>\n";
