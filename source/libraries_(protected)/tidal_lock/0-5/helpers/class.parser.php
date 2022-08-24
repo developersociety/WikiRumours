@@ -399,6 +399,10 @@
 				return substr($html, $startPoint, $endPoint - $startPoint);
 			
 		}
+
+		public function removeHTML($inputText) {
+			return strip_tags($inputText);
+		}
 		
 		public function cleanRichTextHTML($inputText) {
 			/* very limited allowed tags for richtext fields. */
@@ -663,7 +667,7 @@
 					
 					if (!$maximumNumberOfResults || count($feedArray['Items']) < $maximumNumberOfResults) {
 					
-						if (strlen($this->removeHTML($item->get_content(), '')) > $minimumLengthOfPosts) {
+						if (strlen($this->removeHTML($item->get_content())) > $minimumLengthOfPosts) {
 						
 							// look for enclosures
 									if ($checkForEnclosures == 'Y') {
@@ -691,8 +695,8 @@
 										}
 										$feedArray['Items'][$nextConsecutiveNumber]['Guid'] = $item->get_id();
 										$feedArray['Items'][$nextConsecutiveNumber]['Link'] = $item->get_permalink();
-										$feedArray['Items'][$nextConsecutiveNumber]['Summary'] = $this->removeHTML($item->get_description(), '');
-										$feedArray['Items'][$nextConsecutiveNumber]['Content'] = $this->removeHTML($item->get_content(), '');
+										$feedArray['Items'][$nextConsecutiveNumber]['Summary'] = $this->removeHTML($item->get_description());
+										$feedArray['Items'][$nextConsecutiveNumber]['Content'] = $this->removeHTML($item->get_content());
 										if (strlen($feedArray['Items'][$nextConsecutiveNumber]['Content']) < strlen($feedArray['Items'][$nextConsecutiveNumber]['Summary'])) $feedArray['Items'][$nextConsecutiveNumber]['Content'] = $this->removeHTML($item->get_description());
 										$feedArray['Items'][$nextConsecutiveNumber]['Enclosure'] = $foundEnclosureLink;
 										$feedArray['Items'][$nextConsecutiveNumber]['PubDate'] = $item->get_date('Y-m-d H:i:s');
