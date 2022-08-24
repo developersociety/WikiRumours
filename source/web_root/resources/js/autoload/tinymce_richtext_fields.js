@@ -5,14 +5,15 @@ tinymce.init({
 
 tinymce.init({
   selector: "textarea.litehtmleditor",
-  plugins: "link",
+  plugins: "link table",
   menubar: false,
   automatic_uploads: false,
   statusbar: false,
   toolbar:
-    "undo redo | h3 h4 h5 | bold italic | link | strikethrough superscript subscript",
+    "undo redo | h3 h4 h5 | bold italic | link | strikethrough superscript subscript | table",
+  table_toolbar: true,
   valid_elements:
-    "p,i/em,hr,a[href|target=_blank],strong/b,div[align],br,h3,h4,h5",
+    "p,i/em,hr,a[href|target=_blank],strong/b,div[align],br,h3,h4,h5,table,th,tr,td,tbody",
   style_formats: [
     {
       title: "Headings",
