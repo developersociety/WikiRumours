@@ -400,59 +400,43 @@
 			
 		}
 		
-		public function removeHTML($inputString, $tagsToRemove = '') {
-			
-			/*	Removes specific HTML tags from a string. If no tags are specified, attempts to remove all tags
-				Any tags specified for $tagsToRemove should be in the following format: 'br,img,h1'
-				To remove all tags, pass an empty value into $tagsToRemove */
-	
-			global $tl;
+		public function cleanRichTextHTML($inputText) {
+			/* very limited allowed tags for richtext fields. */
+			// If this ends up much more complex, probably switch to a full HTML cleaning library,
+			// htmlpurifier or something.
 
-			if (!$inputString) {
-				$tl->page['console'] .= __CLASS__ . "->" . __FUNCTION__ . ": No input specified.\n";
-				return false;
-			}
+			// First strip down to a limited number of tags:
+			$html = strip_tags($inputText, '<p><br><b><i><strong><em><strikethrough><superscript><subscript><a>');
+
+			// now remove extra attrs:
+			// (so onmouseover, a href="javascript://" is removed, etc...)
+			$dom = new DOMDocument;
+			$dom->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+
+			// find all tag attributes in the DOM:
+			$xpath = new DOMXPath($dom);
+			$nodes = $xpath->query('//@*');
 			
-			if ($tagsToRemove) {
-				$tags = explode(',', $tagsToRemove);
-				foreach ($tags as $key => $value) {
-					if (trim($value)) {
-						$outputString = '';
-						$copyToOutput = 'Y';
-						// check for opening tag
-							for ($counter = 0; $counter < strlen($inputString); $counter++) {
-								$tagPrefix = '<' . $value;
-								if (substr($inputString, $counter - 1, 1) == '>') $copyToOutput = 'Y';
-								if (substr($inputString, $counter, strlen($tagPrefix)) == $tagPrefix) $copyToOutput = 'N';
-								if ($copyToOutput == 'Y') $outputString .= substr($inputString, $counter, 1);
-							}
-							$inputString = $outputString;
-							$outputString = '';
-						// check for closing tag
-							for ($counter = 0; $counter < strlen($inputString); $counter++) {
-								$tagPrefix = '</' . $value;
-								if (substr($inputString, $counter - 1, 1) == '>') $copyToOutput = 'Y';
-								if (substr($inputString, $counter, strlen($tagPrefix)) == $tagPrefix) $copyToOutput = 'N';
-								if ($copyToOutput == 'Y') $outputString .= substr($inputString, $counter, 1);
-							}
-							$inputString = $outputString;
+			foreach ($nodes as $node) {
+				// If more logic is needed to be added here - then probably refactor into array
+
+				// Only allow 'a' tags to have attributes:
+				if ($node->parentNode->nodeName == 'a') {
+					// Only allow href attributes:
+					if ($node->nodeName == 'href') {
+						// non-javascript and non-blob: hrefs only: 
+						if ((strpos($node->nodeValue, 'javascript') !== 0) && (strpos($node->nodeValue, 'blob:') !== 0)) {
+							continue;
+						}
+					// Also allow 'target=_blank' type attrs on a tags:
+					} elseif ($node->nodeName == 'target') {
+						continue;
 					}
 				}
-				$ouputString = $inputString;
+				// Otherwise, remove the attribute:
+				$node->parentNode->removeAttribute($node->nodeName);
 			}
-			else {
-				$outputString = '';
-				$copyToOutput = 'Y';
-				for ($counter = 0; $counter < strlen($inputString); $counter++) {
-					if (substr($inputString, $counter - 1, 1) == '>') $copyToOutput = 'Y';
-					if (substr($inputString, $counter, 1) == '<') $copyToOutput = 'N';
-					if ($copyToOutput == 'Y') $outputString .= substr($inputString, $counter, 1);
-				}
-				
-			}
-			
-			return $outputString;
-			
+			return $dom->saveHTML();
 		}
 		
 /*		--------------------------------------
