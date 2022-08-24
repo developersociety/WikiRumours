@@ -256,7 +256,7 @@
 
 			// clean input
 				$_POST = $parser->trimAll($_POST);
-				$_POST['new_comment'] = $parser->removeHTML($_POST['new_comment']);
+				$_POST['new_comment'] = $parser->cleanRichTextHTML($_POST['new_comment']);
 				
 			// check for errors
 				if (!$_POST['new_comment']) $tl->page['error'] .= "Please provide a comment. ";
