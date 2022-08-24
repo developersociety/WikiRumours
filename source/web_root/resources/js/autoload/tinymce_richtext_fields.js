@@ -9,7 +9,8 @@ tinymce.init({
   menubar: false,
   automatic_uploads: false,
   statusbar: false,
-  toolbar: 'undo redo | h3 h4 h5 | bold italic | link | strikethrough superscript subscript',
+  toolbar:
+    "undo redo | h3 h4 h5 | bold italic | link | strikethrough superscript subscript",
   valid_elements:
     "p,i/em,hr,a[href|target=_blank],strong/b,div[align],br,h3,h4,h5",
   style_formats: [
@@ -42,7 +43,7 @@ tinymce.init({
   menubar: false,
   toolbar: false,
   quickbars_insert_toolbar: false,
-  quickbars_selection_toolbar: 'bold italic strikethrough | quicklink',
+  quickbars_selection_toolbar: "bold italic strikethrough | quicklink",
   statusbar: false,
   automatic_uploads: false,
   valid_elements: "p,i/em,a[href|target=_blank],strong/b,br",
@@ -57,4 +58,35 @@ tinymce.init({
       ],
     },
   ],
+  // Annoying work-around for required=true fields:
+	// First any time the editor changes, save the updates instantly to the form:
+  setup: function (editor) {
+    editor.on("change", function (e) {
+      editor.save();
+    });
+  },
+
+  
+  init_instance_callback: (editor) => {
+    var originalElement = editor.getElement();
+    if (originalElement.required) {
+	  // Remove the 'required' HTML5 attr, to prevent browser errors on a hidden element:
+      editor._required = true;
+      originalElement.required = false;
+
+	  // Next add our own required message using TinyMCE notifications:
+      editor.on("blur", (e) => {
+        if (!editor.getContent()) {
+          editor.notificationManager.open({
+            text: "This field is required",
+            type: "error",
+            closeButton: false,
+          });
+        }
+      });
+      editor.on("focus", (e) => {
+        editor.notificationManager.close();
+      });
+    }
+  },
 });
