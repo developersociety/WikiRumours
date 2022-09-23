@@ -83,7 +83,7 @@
 			// clean input
 				$_POST = $parser->trimAll($_POST);
 				$_POST['description'] = htmlspecialchars_decode(@$_POST['description'], ENT_QUOTES);
-				$_POST['description'] = $parser->removeHTML($_POST['description']);
+				$_POST['description'] = $parser->cleanRichTextHTML($_POST['description']);
 				$_POST['latitude'] = floatval(@$_POST['latitude']);
 				$_POST['longitude'] = floatval(@$_POST['longitude']);
 				$checkboxesToParse = array('enabled', 'newuser_ok_to_contact', 'newuser_anonymous');
@@ -92,7 +92,7 @@
 					else $_POST[$checkbox] = 0;
 				}
 				for ($counter = 0; $counter < count(@$_POST['tags']); $counter++) {
-					$_POST['tags'][$counter] = $parser->removeHTML($_POST['tags'][$counter]);
+					$_POST['tags'][$counter] = strip_tags($_POST['tags'][$counter]);
 					$_POST['tags'][$counter] = $parser->includeOrExcludeCharacters($_POST['tags'][$counter], 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_ ');
 				}
 				
