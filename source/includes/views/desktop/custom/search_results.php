@@ -30,7 +30,7 @@
 					echo "<tr>\n";
 					echo "<td class='nowrap'>" . date('j-M-Y', strtotime($rumours[$counter]['updated_on'])) . "</td>\n";
 					echo "<td class='nowrap'>" . date('j-M-Y', strtotime($rumours[$counter]['occurred_on'])) . "</td>\n";
-					echo "<td><a href='/rumour/" . $rumours[$counter]['public_id'] . "/" . $parser->seoFriendlySuffix($rumours[$counter]['description']) . "'>" . $parser->truncate($rumours[$counter]['description'], 'c', 30) . "</a></td>\n";
+					echo "<td><a href='/rumour/" . $rumours[$counter]['public_id'] . "/" . $parser->seoFriendlySuffix(strip_tags($rumours[$counter]['description'])) . "'>" . $parser->truncate(strip_tags($rumours[$counter]['description']), 'c', 30) . "</a></td>\n";
 					echo "<td>" . $operators->firstTrue(@$rumours[$counter]['status'], '-') . "</td>\n";
 					echo "<td>" . floatval($rumours[$counter]['number_of_sightings']) . "</td>\n";
 					echo "</tr>\n";
@@ -66,7 +66,7 @@
 					elseif (@$rumours[$counter]['priority']) echo "  <span class='tooltips' data-toggle='tooltip' title='" . @$rumours[$counter]['priority'] . "'><span class='badge'>" . substr($rumours[$counter]['priority'], 0, 1) . "</span></span>\n";
 					else echo "  -\n";
 					echo "</td>\n";
-					echo "<td><span class='tooltips' data-toggle='tooltip' title='" . @$rumours[$counter]['description'] . "'><a href='/rumour/" . $rumours[$counter]['public_id'] . "/" . $parser->seoFriendlySuffix($rumours[$counter]['description']) . "'>" . $parser->truncate($rumours[$counter]['description'], 'c', 50) . "</a></span></td>\n";
+					echo "<td><span class='tooltips' data-toggle='tooltip' title='" . strip_tags(@$rumours[$counter]['description']) . "'><a href='/rumour/" . $rumours[$counter]['public_id'] . "/" . $parser->seoFriendlySuffix(strip_tags($rumours[$counter]['description'])) . "'>" . $parser->truncate(strip_tags($rumours[$counter]['description']), 'c', 50) . "</a></span></td>\n";
 					echo "<td class='nowrap'>\n";
 					if (@$rumours[$counter]['status_icon']) echo "  <span class='tooltips' data-toggle='tooltip' title='" . @$rumours[$counter]['status'] . "'>" . $rumours[$counter]['status_icon'] . "</span>\n";
 					elseif (@$rumours[$counter]['status']) echo "  <span class='tooltips' data-toggle='tooltip' title='" . @$rumours[$counter]['status'] . "'><span class='badge'>" . substr($rumours[$counter]['status'], 0, 1) . "</span></span>\n";
@@ -108,7 +108,7 @@
 				if (substr_count($map[$counter]['status'], 'true')) $tl->page['javascript'] .= "      icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png', \n";
 				elseif (substr_count($map[$counter]['status'], 'false')) $tl->page['javascript'] .= "      icon: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png', \n";
 				else $tl->page['javascript'] .= "      icon: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png', \n";
-				$tl->page['javascript'] .= "      title:" . '"' . htmlspecialchars(preg_replace( "/\r|\n/", "", $map[$counter]['status'] . " : " . $map[$counter]['description']), ENT_QUOTES) . '"' . "\n";
+				$tl->page['javascript'] .= "      title:" . '"' . htmlspecialchars(preg_replace( "/\r|\n/", "", $map[$counter]['status'] . " : " . strip_tags($map[$counter]['description'])), ENT_QUOTES) . '"' . "\n";
 				$tl->page['javascript'] .= "    });\n";
 				$tl->page['javascript'] .= "    google.maps.event.addListener(rumour_marker_" . $counter . ", 'click', function() {\n";
 				$tl->page['javascript'] .= "      document.location.href = '/rumour/" . $map[$counter]['public_id'] . "';\n";

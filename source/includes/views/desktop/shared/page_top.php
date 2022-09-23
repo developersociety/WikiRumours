@@ -29,14 +29,14 @@
 
 	// Facebook sharing tags
 		if (@$tl->page['title']) echo "  <meta property='og:title' content=" . '"' . $tl->page['title'] . '"' . " />\n";
-		if (@$tl->page['description']) echo "  <meta property='og:description' content=" . '"' . $tl->page['description'] . '"' . " />\n";
+		if (@$tl->page['description']) echo "  <meta property='og:description' content=" . '"' . strip_tags($tl->page['description']) . '"' . " />\n";
 		if (@$pageImage) echo "  <meta property='og:image' content='" . $pageImage . "' />\n";
 
 	// Twitter sharing tags
 		if (@$tl->page['title'] || @$tl->page['description'] || @$pageImage) {
 			echo "  <meta name='twitter:card' content='summary'>\n";
 			if (@$tl->page['title']) echo "  <meta property='twitter:title' content=" . '"' . $tl->page['title'] . '"' . " />\n";
-			if (@$tl->page['description']) echo "  <meta property='twitter:description' content=" . '"' . $tl->page['description'] . '"' . " />\n";
+			if (@$tl->page['description']) echo "  <meta property='twitter:description' content=" . '"' . strip_tags($tl->page['description']) . '"' . " />\n";
 			if (@$pageImage) echo "  <meta property='twitter:image' content='" . $pageImage . "' />\n";
 		}
 

@@ -7,7 +7,7 @@
 	echo $form->input('hidden', 'deleteThisRumour') . "\n";
 	echo $form->input('hidden', 'templateName', $tl->page['template']) . "\n";
 
-	/* Description */			if (($tl->page['template'] == 'rumour_add' && !$matchingRumour) || ($tl->page['template'] == 'rumour_edit' && $logged_in['is_administrator'] && $logged_in['can_edit_content'])) echo $form->row('textarea', 'description', $operators->firstTrue(@$_POST['description'], @$rumour[0]['description']), true, 'Rumour|Please be as concise as possible', 'form-control', null, 255, array('rows'=>'7'));
+	/* Description */			if (($tl->page['template'] == 'rumour_add' && !$matchingRumour) || ($tl->page['template'] == 'rumour_edit' && $logged_in['is_administrator'] && $logged_in['can_edit_content'])) echo $form->row('textarea', 'description', $operators->firstTrue(@$_POST['description'], @$rumour[0]['description']), true, 'Rumour|Please be as concise as possible', 'form-control richtext', null, 255, array('rows'=>'7'));
 								else echo $form->row('uneditable_static', 'description', "<a href='/rumour/" . $rumour[0]['public_id'] . "/" . $parser->seoFriendlySuffix($rumour[0]['description']) . "' target='_blank'>" . $rumour[0]['description'] . "</a>", false, 'Rumour');
 
 	if ($tl->page['template'] == 'rumour_edit') {
@@ -17,7 +17,7 @@
 
 		/* Enabled */		echo $form->row('yesno_bootstrap_switch', 'enabled', $operators->firstTrueStrict(@$_POST['enabled'], @$rumour[0]['enabled']), false, "<a href='javascript:void(0)' class='tooltips' onClick='return false' data-toggle='tooltip' title='Disabling this rumour hides it from public access, acting as a form of soft delete.'>Enabled</a>?", null, null, null, array('data-on-color'=>'default', 'data-off-color'=>'default'));
 		/* Status */		echo $form->row('select', 'status_id', $operators->firstTrue(@$_POST['status_id'], @$rumour[0]['status_id']), true, 'Status', 'form-control', $rumourStatuses);
-		/* Findings */		echo $form->row('textarea', 'findings', $operators->firstTrue(@$_POST['findings'], @$rumour[0]['findings']), false, 'Findings', 'form-control', null, null, array('rows'=>'5'));
+		/* Findings */		echo $form->row('textarea', 'findings', $operators->firstTrue(@$_POST['findings'], @$rumour[0]['findings']), false, 'Findings', 'form-control litehtmleditor', null, null, array('rows'=>'5'));
 		/* Priority */		echo $form->row('select', 'priority_id', $operators->firstTrue(@$_POST['priority_id'], @$rumour[0]['priority_id']), true, 'Priority', 'form-control', $rumourPriorities);
 		/* Assigned to */	echo $form->row('select', 'assigned_to', $operators->firstTrue(@$_POST['assigned_to'], @$rumour[0]['assigned_to']), false, 'Assigned to', 'form-control', $allModeratorsAndCommunityLiaisons);
 		/* Verified with */	echo $form->row('text', 'verified_with', $operators->firstTrue(@$_POST['verified_with'], @$rumour[0]['verified_with']), false, "<a href='javascript:void(0)' class='tooltips' onClick='return false' data-toggle='tooltip' title='Information entered in this field will never be visible to anyone other than moderators, community liaisons and administrators.'>Verified with</a>", 'form-control', null, 255);

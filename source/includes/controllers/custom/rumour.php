@@ -256,7 +256,7 @@
 
 			// clean input
 				$_POST = $parser->trimAll($_POST);
-				$_POST['new_comment'] = $parser->removeHTML($_POST['new_comment']);
+				$_POST['new_comment'] = $parser->cleanRichTextHTML($_POST['new_comment']);
 				
 			// check for errors
 				if (!$_POST['new_comment']) $tl->page['error'] .= "Please provide a comment. ";
@@ -670,12 +670,12 @@
 
 			}
 
-			$response_form .= $this->render_field('response_what', 'textarea', 'What:');
+			$response_form .= $this->render_field('response_what', 'textarea', 'What:', 'form-control litehtmleditor');
 			$response_form .= $this->render_field('response_who', 'select', 'Who:', 'form-control select2', [$this->relevantUsers]);
 			$response_form .= $this->render_field('response_start_date', 'date', 'Start Date:');
 			/* $response_form .= $this->render_field('response_duration_weeks', 'number', 'Duration (in weeks):'); */
 			/* $response_form .= $this->render_field('response_completion_date', 'date', 'Completion Date:'); */
-			$response_form .= $this->render_field('response_outcomes', 'textarea', 'Intended Outcomes:');
+			$response_form .= $this->render_field('response_outcomes', 'textarea', 'Intended Outcomes:', 'form-control litehtmleditor');
 			$response_form .= $this->render_field('response_completed', 'checkbox', 'Completed', '');
 			$response_form .= $this->render_field('response_uploads', 'file_dropzone', 'Attachments:', 'form-control',
 				[null, null, ['destination_path' => $this->temporary_upload_files_dir]]
