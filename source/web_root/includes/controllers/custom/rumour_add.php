@@ -54,7 +54,7 @@
 			
 			// clean input
 				$_POST = $parser->trimAll($_POST);
-				$_POST['description'] = $parser->removeHTML(@$_POST['description']);
+				$_POST['description'] = $parser->cleanRichTextHTML(@$_POST['description']);
 				
 			// check for errors
 				if (!$_POST['description']) $tl->page['error'] .= "Please enter a rumour. ";
@@ -100,7 +100,7 @@
 			// clean input
 				$_POST = $parser->trimAll($_POST);
 				$_POST['description'] = htmlspecialchars_decode(@$_POST['description'], ENT_QUOTES);
-				$_POST['description'] = $parser->removeHTML($_POST['description']);
+				$_POST['description'] = $parser->cleanRichTextHTML($_POST['description']);
 				$checkboxesToParse = array('newuser_primary_phone_sms', 'newuser_secondary_phone_sms', 'newuser_ok_to_contact', 'newuser_anonymous');
 				foreach ($checkboxesToParse as $checkbox) {
 					if (isset($_POST[$checkbox])) $_POST[$checkbox] = 1;
