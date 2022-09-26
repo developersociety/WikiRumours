@@ -940,7 +940,7 @@
 							if (@$otherAttributes['link-to']) {
 								$linkTo = $otherAttributes['link-to'];
 								unset($otherAttributes['link-to']);
-								if (!file_exists(__DIR__ . '/../../../../web_root/includes/controllers/ajax/retrieve_regions.php')) {
+								if (!file_exists(__DIR__ . '/../../../../wwwroot/includes/controllers/ajax/retrieve_regions.php')) {
 									$tl->page['console'] .= __FUNCTION__ . " (" . $name . "): Unable to locate AJAX destination.\n";
 									return false;
 								}
