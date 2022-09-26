@@ -78,8 +78,8 @@
 					}
 
 					if ($this->cms[0]['content_type'] == 'f') {
-						if (!file_exists(__DIR__ . '/../../../../web_root/' . $this->cms[0]['destination_url'])) $tl->page['error'] .= "Unable to locate the file " . $this->cms[0]['destination_url'] . ". ";
-						else $this->file_metadata = $file_manager->extractFileMetadata(__DIR__ . '/../../../../web_root/' . $this->cms[0]['destination_url']);
+						if (!file_exists(__DIR__ . '/../../../../wwwroot/' . $this->cms[0]['destination_url'])) $tl->page['error'] .= "Unable to locate the file " . $this->cms[0]['destination_url'] . ". ";
+						else $this->file_metadata = $file_manager->extractFileMetadata(__DIR__ . '/../../../../wwwroot/' . $this->cms[0]['destination_url']);
 					}
 					elseif ($this->cms[0]['content_type'] == 'r') {
 						$this->http_statuses = array();
@@ -89,7 +89,7 @@
 						}
 					}
 					elseif ($this->cms[0]['content_type'] == 'd') {
-						if (!file_exists(__DIR__ . '/../../../../web_root/' . $this->cms[0]['destination_url'])) $tl->page['error'] .= "Unable to locate the logo " . $this->cms[0]['destination_url'] . ". ";
+						if (!file_exists(__DIR__ . '/../../../../wwwroot/' . $this->cms[0]['destination_url'])) $tl->page['error'] .= "Unable to locate the logo " . $this->cms[0]['destination_url'] . ". ";
 					}
 
 				}
@@ -314,7 +314,7 @@
 						// save file(s)
 							$timestamp = date('Y-m-d H:i:s');
 							if (@end($_POST['file_cms_upload'])) {
-								$new_path = __DIR__ . '/../../../../web_root/' . $this->file_path . '/' . date('YmdHis', strtotime($timestamp));
+								$new_path = __DIR__ . '/../../../../wwwroot/' . $this->file_path . '/' . date('YmdHis', strtotime($timestamp));
 								$success = @mkdir($new_path);
 								if (!$success || !file_exists($new_path)) $tl->page['error'] .= "Unable to create subdirectory for this upload. ";
 								else {
@@ -880,10 +880,10 @@
 						$this->html .= "  </div>\n";
 
 						$this->html .= "  <div role='tabpanel' class='tab-pane" . ($this->tab == 'preview' ? " active" : false) . "' id='preview'>\n";
-						if ($file_manager->isImage(__DIR__ . '/../../../../web_root/' . $this->cms[0]['destination_url'])) {
+						if ($file_manager->isImage(__DIR__ . '/../../../../wwwroot/' . $this->cms[0]['destination_url'])) {
 							$this->html .= "<center><img src='/" . $this->cms[0]['destination_url'] . "' class='img-responsive' /></center>\n";
 						}
-						elseif ($file_manager->isPDF(__DIR__ . '/../../../../web_root/' . $this->cms[0]['destination_url'])) {
+						elseif ($file_manager->isPDF(__DIR__ . '/../../../../wwwroot/' . $this->cms[0]['destination_url'])) {
 							$this->html .= "<iframe src='http://docs.google.com/gview?url=" . urlencode($tl->page['protocol'] . $tl->page['root'] . "/" . $this->cms[0]['destination_url']) . "&embedded=true' width='100%' height='500' frameborder='0'>Attempting to display...</iframe>\n";
 						}
 						elseif (@$metadata['File extension'] == 'docx' || @$metadata['File extension'] == 'doc' || @$metadata['File extension'] == 'xlsx' || @$metadata['File extension'] == 'xls' || @$metadata['File extension'] == 'pptx' || @$metadata['File extension'] == 'ppt') {
@@ -968,7 +968,7 @@
 											/* Cancel */	$this->html .= "      " . $form->input('cancel_and_return', 'cancel_button', null, false, "Cancel", 'btn btn-link') . "\n";
 											$this->html .= "      </div>\n";
 											$this->html .= "      <div class='col-md-2 col-sm-2 col-xs-4 text-right'>\n";
-											/* Delete */	if (file_exists(__DIR__ . '/../../../../web_root/' . $this->file_path . '/' . date('YmdHis', strtotime($this->cms[0]['updated_on'])) . '/' . $this->cms[0]['destination_url'])) $this->html .= "    " . $form->input('button', 'delete_logo_button', null, false, 'Delete Logo', 'btn btn-danger', null, null, null, null, ['onClick'=>'if (confirm("Are you sure?")) { document.addEditContentForm.deleteLogo.value = "Y"; document.addEditContentForm.submit(); }']) . "\n";
+											/* Delete */	if (file_exists(__DIR__ . '/../../../../wwwroot/' . $this->file_path . '/' . date('YmdHis', strtotime($this->cms[0]['updated_on'])) . '/' . $this->cms[0]['destination_url'])) $this->html .= "    " . $form->input('button', 'delete_logo_button', null, false, 'Delete Logo', 'btn btn-danger', null, null, null, null, ['onClick'=>'if (confirm("Are you sure?")) { document.addEditContentForm.deleteLogo.value = "Y"; document.addEditContentForm.submit(); }']) . "\n";
 															if (@$this->cms[0]['deletable']) $this->html .= "    " . $form->input('button', 'delete_button', null, false, 'Delete', 'btn btn-danger', null, null, null, null, ['onClick'=>'if (confirm("Are you sure?")) { document.addEditContentForm.deleteContent.value = "Y"; document.addEditContentForm.submit(); }']) . "\n";
 											$this->html .= "      </div>\n";
 											$this->html .= "  </div>\n";
