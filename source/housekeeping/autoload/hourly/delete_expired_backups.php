@@ -10,7 +10,7 @@
 
 		foreach ($folders as $folderName) {
 
-			$destinationPath = __DIR__ . '/../../../backups/' . $folderName;
+			$destinationPath = __DIR__ . '/../backups/' . $folderName;
 
 			$numberOfBackupsDeleted = 0;
 		

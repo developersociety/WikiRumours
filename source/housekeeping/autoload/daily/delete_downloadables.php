@@ -2,7 +2,7 @@
 
 	if (@$tl->settings['Delete downloadables after']) {
 
-		$downloadPath = __DIR__ . '/../../../web_root/downloads';
+		$downloadPath = __DIR__ . '/downloads';
 		$numberOfItemsDeleted = 0;
 		
 		// make sure download directory exists
