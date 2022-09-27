@@ -18,7 +18,8 @@
 			}
 		}
 		
-		if (@$filters['view'] != 'sightings' && @$filters['view'] != 'comments') $filters['view'] = 'rumour';
+		// Set a default tab view if none of the correct options are set
+		if (!in_array(@$filters['view'], ['sightings', 'comments', 'response'])) $filters['view'] = 'rumour';
 		
 	// queries
 		if ($logged_in['is_moderator'] || $logged_in['is_administrator']) $rumour = retrieveRumours(array('public_id'=>$publicID), null, null, null, 1);
@@ -68,6 +69,9 @@
 			
 	if (@$filters['view'] == 'sightings') $tl->page['events'] = "populateMap();";
 	$tl->page['description'] = $rumour[0]['description'];
+
+
+	$responseForm = new ResponseForm($rumour[0], $allUsers);
 
 /*	--------------------------------------
 	Execute only if a form post
@@ -332,7 +336,23 @@
 			// redirect
 				$authentication_manager->forceRedirect('/rumour/' . $publicID . '/' . $parser->seoFriendlySuffix($rumour[0]['description']) . '/' . $keyvalue_array->updateKeyValue($tl->page['parameter3'], 'view', 'comments', '|') . '/success=comment_enabled');
 				
+		} elseif ($_POST['formName'] == 'responseForm' && $logged_in) {
+			/* $new_data = array( */
+			/* 	'updated_on'=>date('Y-m-d H:i:s'), */
+			/* 	// 'response_who'=>$_POST['response_who'], // TODO validate! */
+			/* 	'response_start_date'=>$_POST['response_start_date'], // TODO validate! */
+			/* 	'response_outcomes'=>$_POST['response_outcomes'], // TODO validate! */
+			/* ); */
+
+			/* updateDb('rumours', $new_data, array('rumour_id'=>$rumour[0]['rumour_id']), null, null, null, null, 1); */
+			$responseForm->injest($_POST);
+			if ($responseForm->is_valid()) {
+				$responseForm->save();
+			} else {
+				$tl->page['error'] = 'Invalid Response';
+			}
 		}
+		
 		
 	}
 		
@@ -342,5 +362,357 @@
 		
 	else {
 	}
+
+	class BaseForm {
+		/*
+		 * A Form class, kind of how django does it - keeping the rendering, saving, parsing,
+		 * cleaning & validation all together.
+		 *
+		 * Usage eg.:
+		 *
+		 * class ResponseForm extends BaseForm {
+		 *		public $fields = ['foo', 'bar', 'baz'];
+		 *		public function render() {
+		 *		    global $form;
+		 *		    $html = $form->start();
+		 *		    $html .= $form->row('foo', 'text');
+		 *		    $html .= $form->row('bar', 'text');
+		 *		    $html .= $form->row('baz', 'text');
+		 *		    $html .= $form->end();
+		 *		    return $html
+		 *		}
+		 * }
+		 * 
+		 *
+		 * $responseForm =new ResponseForm($rumour, $allValidUsersForDropDown);
+		 * if (is a POST response) {
+		 *		$responseForm->injest($_POST);
+		 *		if ($responseForm->is_valid()) {
+		 *			$responseForm->save();
+		 *		}
+		 * }
+		 *
+		 * ...
+		 * echo $responseForm->render();
+		 * ...
+		 *
+		 * */
+		public $data;
+		public $errors;
+		public $fields = array();
+
+		public function injest($data) {
+			/* Given an key => value array, load all known fields into $this->data,
+			 * storing any errors.
+			 */
+			foreach($this->fields as $fieldname) {
+				try {
+					$cleaner = "clean_${fieldname}";
+					if (method_exists($this, $cleaner)) {
+						$this->data[$fieldname] = $this->{$cleaner}($data[$fieldname]);
+					} else {
+						$this->data[$fieldname] = $data[$fieldname];
+					}
+				} catch (Exception $err) {
+					$this->errors[$fieldname] = $err;
+					$this->data[$fieldname] = $data[$fieldname];
+				}
+			}
+			if (method_exists($this, 'clean')) {
+				try {
+					$this->clean($data);
+				} catch (Exception $err) {
+					$this->errors['__all__'] = $err;
+				}
+			}
+		}
+		public function render_error($fieldname) {
+			if (!isset($this->errors[$fieldname])) { return ''; }
+
+			$err = $this->errors[$fieldname];
+			if ($err) {
+				return '<div class="alert alert-danger">' . $err->getMessage() . '</div>';
+			}
+		}
+
+		public function render_field($fieldname, $fieldtype, $label=null, $css_class='form-control ', $extra_args=array()) {
+			/*
+			 * Render a form field with the current data, and include any error messages.
+			 */
+
+			global $form; // the CMS form renderer...
+			global $tl;
+
+			/* if (!isset($this->data[$fieldname])) { */
+			/* 	$this->data[$fieldname] = ['post_path']; */
+			/* } */
+
+			return $form->row(
+				$fieldtype, // type
+				$fieldname, // name
+				$this->data[$fieldname], // value
+				false, // mandatory
+				$label?:$fieldname, // label
+				$css_class, // css class
+				...$extra_args // options, max_length, otherAttributes, truncateLabel, eventHandlers
+			) . $this->render_error($fieldname);
+
+		}
+
+		public function is_valid() {
+			return empty($this->errors);
+		}
+	}
+
+
+	class BaseFormWithUploads extends BaseForm {
+		/* 
+		 * This extends the BaseForm with functionality for handling file uploads & deletions,
+		 * using the same system as the rest of the site, but hopefully a bit cleaner / more
+		 * re-usable logic.
+		 *
+		 * Files are uploaded initially to the `$this->temporary_upload_files_dir` - and then
+		 * moved into a final uploads path (can be different per field).
+		 *
+		 * To handle deleting, a list of delete checkboxes & hidden fields are added
+		 * to the form - with names which tie them together so the logic here knows which
+		 * selected files should be deleted.
+		 *
+		 * */
+		public $temporary_upload_files_dir;
+		public $temporary_upload_files_abspath;
+		// TODO - Could having a single temporary_upload_files_dir be a problem with
+		//        multiple files with the same name being uploaded to different fields???
 		
-?>
+		public function get_attachments($uploadsPath) {
+			/* Helper method to return list of files in a path. */
+			global $directory_manager;
+
+			if (file_exists($uploadsPath)) {
+				return $directory_manager->read($uploadsPath , false, false, true);
+			} else {
+				return [];
+			}
+
+		}
+
+
+		public function save_uploads($field_name, $destinationPath) {
+			/*
+			 * Given a base $field_name, and location to save new files to,
+			 * find all the files which have been uploaded to the `temporary_upload_files_dir`
+			 * and move them to $destinationPath.
+			 * */
+
+			global $tl;
+			// Uses $_POST directly...
+
+			if (@$_POST['file_' . $field_name]) {
+				foreach ($_POST['file_' . $field_name] as $uploadedFile) {
+					$filename = basename($uploadedFile);
+					$uploadedFile = $this->temporary_upload_files_abspath . '/' . $filename;
+
+					// Create directory for this rumour, if required:
+					if (!file_exists($destinationPath)) {
+						mkdir($destinationPath);
+					}
+					// Try to move the file into that directory:
+					$success = rename($uploadedFile, $destinationPath . '/' . $filename);
+					if (!$success || !file_exists($destinationPath . '/' . $filename)) {
+						$tl->page['error'] .= "Unable to retrieve uploaded file for some reason. ";
+					}
+				}
+			}
+		}
+
+		public function delete_selected_uploaded_files($field_name, $uploadsPath) {
+			/* 
+			 * Given a base $field_name, and a location where uploads are stored,
+			 * delete any uploaded files which are mentioned by `delete_${field_name}_...` fields.
+			 *
+			 * Use with $this->render_attachments_list to generate correct HTML fields.
+			 * */
+			global $directory_manager;
+			global $tl;
+			// Uses $_POST directly...
+			
+			// TODO - should this actually move them to a trash dir instead of deleting?
+
+			if (file_exists($uploadsPath)) {
+				$attachments = $directory_manager->read($uploadsPath, false, false, true);
+
+				if (count($attachments)) {
+					for ($counter = 0; $counter < count($attachments); $counter++) {
+						$should_delete_attachment = isset($_POST['delete_'. $field_name .'_' . $counter]);
+						$attachment_filepath = $_POST['delete_'. $field_name .'_filepath_' . $counter];
+						$attachment_filepath = basename($attachment_filepath);
+
+						if (!strlen($attachment_filepath)) {
+							$tl->page['error'] .= "Unable to delete an attachment. " . $attachment_filepath;
+							continue;
+						}
+
+						$attachment_filepath = $uploadsPath . $attachment_filepath;
+
+						if (!is_file($attachment_filepath)) {
+							$tl->page['error'] .= "Unable to delete an attachment. " . $attachment_filepath;
+							continue;
+						}
+
+						if ($should_delete_attachment) {
+							$success = @unlink ($attachment_filepath);
+							if (!$success || file_exists($attachment_filepath)) {
+								$tl->page['error'] .= "Unable to delete attachment: " . $attachment_filepath;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		function render_attachments_list($field_name, $attachments, $attachments_base_url) {
+			/* 
+			 * Given a base $field_name, a list of $attachments (file names) and the base URL
+			 * where user-facing links to the downloads should go, generate a list of attachment
+			 * links, with "[x] Delete" checkboxes and filenames, suitable for use with 
+			 * delete_selected_uploaded_files
+			 * */
+			$html = '<ul class="list-group">';
+			foreach ($attachments as $index => $attachment) {
+				$filename = basename($attachment);
+				$html .= '<li class="list-group-item">';
+				$html .= '<input type="hidden" name="delete_' . $field_name . '_filepath_' . $index . '" value="' . $filename . '">';
+				$html .= '<a target=_"blank" href="' . $attachments_base_url . $filename . '">' . $filename . '</a>';
+				$html .= '<span class="pull-right"><input type="checkbox" name="delete_' . $field_name . '_' . $index . '"> Delete</input></span>';
+				$html .= '</li>';
+			}
+			$html .= "</ul>";
+
+			return $html;
+		}
+	}
+
+	class ResponseForm extends BaseFormWithUploads {
+		private $rumour;
+		private $relevantUsers;
+
+		// Which field(names) it should look for in $_POST or the $rumour object:
+		public $fields = [
+			'response_what',
+			'response_who',
+			'response_start_date',
+			/* 'response_duration_weeks', */
+			/* 'response_completion_date', */
+			'response_completed',
+			'response_outcomes',
+			'response_uploads',
+		];
+
+		public function __construct($rumour, $relevantUsers) {
+			$this->rumour = $rumour;
+			$this->relevantUsers = $relevantUsers;
+
+			$this->data = array();
+			$this->data['response_uploads'] = [];
+			$this->injest($this->rumour);
+
+			// First upload to `trash`, move any actually desired ones into the correct place on save:
+			$this->temporary_upload_files_dir = 'trash/';
+			// This stupid ../../.. thing needed because it's hard coded into the file upload widget code...
+			$this->temporary_upload_files_abspath = realpath(__DIR__ . '/../../../../' . $this->temporary_upload_files_dir);
+
+			// TODO - make $FILE_UPLOAD_PATH a global
+			$FILE_UPLOAD_PATH = __DIR__ . '/../../../uploads';
+			/* $FILE_UPLOAD_PATH = '/srv/web_root/uploads'; */
+			$this->upload_files_dir = $FILE_UPLOAD_PATH . '/rumour_response_attachments/' . $this->rumour['public_id'] . '/';
+
+		}
+
+		public function is_empty() {
+			/* Used by tab header to ask if there's any data here... */
+			foreach($this->data as $row) {
+				if ($row) {
+					return False;
+				}
+				if ($this->get_attachments($this->upload_files_dir)) {
+					return False;
+				}
+			}
+				
+			return True;
+		}
+
+		public function clean_response_who($value) {
+			if ($value && !array_key_exists($value, $this->relevantUsers)) {
+				throw new Exception("Not a valid user!");
+			}
+			return $value;
+		}
+		public function clean_response_duration_weeks($value) {
+			# only parse to positive int:
+			return ctype_digit($value) ? intval($value) : null;
+		}
+
+		public function render() {
+			/*
+			 * returns HTML to send to the visitor.
+			 */
+			global $form; // the CMS form renderer...
+
+			$response_form = '';
+			$response_form .= $form->start('responseForm', '', 'post');
+			if (!$this->is_valid()) {
+				$response_form .= '<div class="alert alert-danger">Please correct the following errors.</div>';
+				if (isset($this->errors['__all__'])) {
+					$response_form .= '<div class="alert alert-danger">' . $this->errors['__all__'].getMessage() . '</div>';
+				}
+
+			}
+
+			$response_form .= $this->render_field('response_what', 'textarea', 'What:', 'form-control litehtmleditor');
+			$response_form .= $this->render_field('response_who', 'select', 'Who:', 'form-control select2', [$this->relevantUsers]);
+			$response_form .= $this->render_field('response_start_date', 'date', 'Start Date:');
+			/* $response_form .= $this->render_field('response_duration_weeks', 'number', 'Duration (in weeks):'); */
+			/* $response_form .= $this->render_field('response_completion_date', 'date', 'Completion Date:'); */
+			$response_form .= $this->render_field('response_outcomes', 'textarea', 'Intended Outcomes:', 'form-control litehtmleditor');
+			$response_form .= $this->render_field('response_completed', 'checkbox', 'Completed', '');
+			$response_form .= $this->render_field('response_uploads', 'file_dropzone', 'Attachments:', 'form-control',
+				[null, null, ['destination_path' => $this->temporary_upload_files_dir]]
+			);
+
+			$current_attachments = $this->get_attachments($this->upload_files_dir);
+			if ($current_attachments) {
+				$response_form .= '<div class="form-group">';
+				$response_form .= '<label class="col-lg-3 col-md-3 col-sm-4 col-xs-12 control-label sr-only">Current attachments:</label>';
+				$response_form .= '<div class="col-lg-9 col-md-9 col-sm-8 col-xs-12">';
+				$response_form .= $this->render_attachments_list(
+					'response_uploads', // base field_name
+					$current_attachments, // attachment files
+					'/uploads/rumour_response_attachments/'  . $this->rumour['public_id'] . '/' // URL base for files
+				);
+				$response_form .= '</div></div>';
+			}
+
+			// TODO - create a new 'date_with_picker' in tidal_lock/0-5/helpers/class.form.php
+
+			$response_form .= '<input type="submit" class="btn btn-info" value="Save"/>';
+
+			$response_form .= $form->end();
+			return $response_form;
+		}
+
+		public function save() {
+			$response_uploads = $this->data['response_uploads'];	
+			// First delete any files which have been selected for deletion:
+			$this->delete_selected_uploaded_files('response_uploads', $this->upload_files_dir);
+			// And now move in any new files from the temporary upload directory:
+			$this->save_uploads(
+				'response_uploads', // field name
+				$this->upload_files_dir // destinationPath
+			);
+			unset($this->data['response_uploads']);
+			updateDb('rumours', $this->data, array('rumour_id'=>$this->rumour['rumour_id']), null, null, null, null, 1);
+			$this->data['response_uploads'] = $response_uploads;
+
+		}
+	}
