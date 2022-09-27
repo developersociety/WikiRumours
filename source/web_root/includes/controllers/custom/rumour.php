@@ -622,8 +622,8 @@
 			$this->temporary_upload_files_abspath = realpath(__DIR__ . '/../../../../' . $this->temporary_upload_files_dir);
 
 			// TODO - make $FILE_UPLOAD_PATH a global
-			/* $FILE_UPLOAD_PATH = __DIR__ . '/../../../uploads'; */
-			$FILE_UPLOAD_PATH = '/srv/web_root/uploads';
+			$FILE_UPLOAD_PATH = __DIR__ . '/../../../uploads';
+			/* $FILE_UPLOAD_PATH = '/srv/web_root/uploads'; */
 			$this->upload_files_dir = $FILE_UPLOAD_PATH . '/rumour_response_attachments/' . $this->rumour['public_id'] . '/';
 
 		}
