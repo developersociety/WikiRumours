@@ -71,6 +71,10 @@
 			echo "    <div class='col-lg-2 col-md-2 hidden-sm hidden-xs btn btn-link text-right'>\n";
 			echo "      <a href='/export/" . urlencode($keyvalue_array->updateKeyValue($tl->page['parameter1'], 'report', 'rumours', '|')) . "' target='_blank'>Export</a>\n";
 			echo "    </div>\n";
+		// move to subsite button
+			echo "    <div class='col-lg-2 col-md-2 hidden-sm hidden-xs btn btn-link text-right'>\n";
+			echo "      <a class='btn btn-default' href='/move_rumours_to_subdomain/" . urlencode($keyvalue_array->updateKeyValue($tl->page['parameter1'], 'report', 'rumours', '|')) . "' target='_blank'>Move to Subdomain</a>\n";
+			echo "    </div>\n";
 		echo "  </div>\n";
 		echo $form->end() . "\n";
 
