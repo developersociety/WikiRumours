@@ -715,7 +715,7 @@
 											$this->html .= $form->rowEnd();
 						/* Language */ 		$this->html .= $form->row('language', 'language_id', (@$_POST['language_id'] ? $_POST['language_id'] : @$this->cms[0]['language_id']), false, 'Language', 'form-control');
 						/* Domain Alias */ 	if (count($this->domain_aliases)) $this->html .= $form->row('select', 'domain_alias_id', (@$_POST['domain_alias_id'] ? $_POST['domain_alias_id'] : @$this->cms[0]['domain_alias_id']), false, 'Domain Alias', 'form-control', $this->domain_aliases);
-						/* Content */		$this->html .= $form->row('textarea', 'content', (@$_POST['content'] ? $_POST['content'] : @$this->cms[0]['content']), true, 'Content|Plain text or HTML', 'form-control', null, null, ['rows'=>'10'], null, ['onChange'=>'document.getElementById("preview").innerHTML=this.value;']);
+						/* Content */		$this->html .= $form->row('textarea', 'content', (@$_POST['content'] ? $_POST['content'] : @$this->cms[0]['content']), true, 'Content|Plain text or HTML', 'form-control fullhtmleditor', null, null, ['rows'=>'10'], null, ['onChange'=>'document.getElementById("preview").innerHTML=this.value;']);
 										
 						$this->html .= "  <div id='more-fields-container' class='collapse" . (@$_POST['is_login_required'] || @$this->cms[0]['is_login_required'] || @$_POST['content_js'] || @$this->cms[0]['content_js'] || @$_POST['content_css'] || @$this->cms[0]['content_css'] ? " in" : false) . "'>\n";
 						
@@ -755,7 +755,7 @@
 						/* Public ID */ 	$this->html .= $form->row('text', 'public_id', (@$_POST['public_id'] ? $_POST['public_id'] : @$this->cms[0]['public_id']), true, "<a href='javascript:void(0);' name='popover' data-toggle='popover' data-placement='left' data-content='This is used to reference the content block within the source code of the application. If changing this descriptor, please update the source code accordingly.'><span class='glyphicon glyphicon-question-sign translucent'></span></a> &nbsp; Unique Descriptor|The shorter the better", 'form-control', null, 100) . "\n";
 						/* Language */ 		$this->html .= $form->row('language', 'language_id', (@$_POST['language_id'] ? $_POST['language_id'] : @$this->cms[0]['language_id']), false, 'Language', 'form-control');
 						/* Domain Alias */ 	if (count($this->domain_aliases)) $this->html .= $form->row('select', 'domain_alias_id', (@$_POST['domain_alias_id'] ? $_POST['domain_alias_id'] : @$this->cms[0]['domain_alias_id']), false, 'Domain Alias', 'form-control', $this->domain_aliases);
-						/* Content */		$this->html .= $form->row('textarea', 'content', (@$_POST['content'] ? $_POST['content'] : @$this->cms[0]['content']), true, 'Content|Plain text or HTML', 'form-control', null, null, ['rows'=>'10'], null, ['onChange'=>'document.getElementById("preview").innerHTML=highlightMergeFields(this.value);']);
+						/* Content */		$this->html .= $form->row('textarea', 'content', (@$_POST['content'] ? $_POST['content'] : @$this->cms[0]['content']), true, 'Content|Plain text or HTML', 'form-control fullhtmleditor', null, null, ['rows'=>'10'], null, ['onChange'=>'document.getElementById("preview").innerHTML=highlightMergeFields(this.value);']);
 										
 						$this->html .= "  <div id='more-fields-container' class='collapse" . (@$_POST['is_login_required'] || @$this->cms[0]['is_login_required'] || @$_POST['content_js'] || @$this->cms[0]['content_js'] || @$_POST['content_css'] || @$this->cms[0]['content_css'] ? " in" : false) . "'>\n";
 						
@@ -796,7 +796,7 @@
 						/* Subject */ 		$this->html .= $form->row('text', 'public_id', (@$_POST['public_id'] ? $_POST['public_id'] : @$this->cms[0]['public_id']), true, "Subject", 'form-control', null, 100) . "\n";
 						/* Language */ 		$this->html .= $form->row('language', 'language_id', (@$_POST['language_id'] ? $_POST['language_id'] : @$this->cms[0]['language_id']), false, 'Language', 'form-control');
 						/* Domain Alias */ 	if (count($this->domain_aliases)) $this->html .= $form->row('select', 'domain_alias_id', (@$_POST['domain_alias_id'] ? $_POST['domain_alias_id'] : @$this->cms[0]['domain_alias_id']), false, 'Domain Alias', 'form-control', $this->domain_aliases);
-						/* Content HTML */	$this->html .= $form->row('textarea', 'content', (@$_POST['content'] ? $_POST['content'] : @$this->cms[0]['content']), true, "<a href='javascript:void(0);' name='popover' data-toggle='popover' data-placement='left' data-content='Desktop mail readers will generally show the HTML version, while mobile mail readers may show only the text version.'><span class='glyphicon glyphicon-question-sign translucent'></span></a> &nbsp; Body|HTML Version", 'form-control', null, null, ['rows'=>'10'], null, ['onChange'=>'document.getElementById("preview_html").innerHTML=highlightMergeFields(this.value);']);
+						/* Content HTML */	$this->html .= $form->row('textarea', 'content', (@$_POST['content'] ? $_POST['content'] : @$this->cms[0]['content']), true, "<a href='javascript:void(0);' name='popover' data-toggle='popover' data-placement='left' data-content='Desktop mail readers will generally show the HTML version, while mobile mail readers may show only the text version.'><span class='glyphicon glyphicon-question-sign translucent'></span></a> &nbsp; Body|HTML Version", 'form-control fullhtmleditor', null, null, ['rows'=>'10'], null, ['onChange'=>'document.getElementById("preview_html").innerHTML=highlightMergeFields(this.value);']);
 						/* Content Text */	$this->html .= $form->row('textarea', 'content_plain', (@$_POST['content_plain'] ? $_POST['content_plain'] : @$this->cms[0]['content_plain']), true, "|Text Version", 'form-control', null, null, ['rows'=>'10'], null, ['onChange'=>'document.getElementById("preview_text").innerHTML=highlightMergeFields(this.value);']);
 										
 						/* Actions */		$this->html .= "  <div class='row'>\n";
@@ -825,7 +825,7 @@
 						/* Public ID */ 	$this->html .= $form->row('text', 'public_id', (@$_POST['public_id'] ? $_POST['public_id'] : @$this->cms[0]['public_id']), true, "URI Slug", 'form-control', null, 100) . "\n";
 						/* Language */ 		$this->html .= $form->row('language', 'language_id', (@$_POST['language_id'] ? $_POST['language_id'] : @$this->cms[0]['language_id']), false, 'Language', 'form-control');
 						/* Domain Alias */ 	if (count($this->domain_aliases)) $this->html .= $form->row('select', 'domain_alias_id', (@$_POST['domain_alias_id'] ? $_POST['domain_alias_id'] : @$this->cms[0]['domain_alias_id']), false, 'Domain Alias', 'form-control', $this->domain_aliases);
-						/* Content */		$this->html .= $form->row('textarea', 'content', (@$_POST['content'] ? $_POST['content'] : @$this->cms[0]['content']), true, 'Content|Plain text or HTML', 'form-control', null, null, ['rows'=>'3']);
+						/* Content */		$this->html .= $form->row('textarea', 'content', (@$_POST['content'] ? $_POST['content'] : @$this->cms[0]['content']), true, 'Content|Plain text or HTML', 'form-control fullhtmleditor', null, null, ['rows'=>'3']);
 										
 						/* Actions */		$this->html .= "  <div class='row'>\n";
 											$this->html .= "    <div class='col-md-10 col-sm-10 col-xs-8'>\n";
