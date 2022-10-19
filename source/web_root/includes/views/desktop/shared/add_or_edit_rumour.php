@@ -88,14 +88,6 @@
 								elseif (@$rumour[0]['occurred_on'] == '0000-00-00 00:00:00') echo $form->row('uneditable_static', 'occurred_on', 'Unknown', false, 'Occurred on');
 								else echo $form->row('uneditable_static', 'occurred_on', date('F j, Y', strtotime(@$rumour[0]['occurred_on'])), false, 'Occurred on');
 								
-								if ($tl->page['template'] == 'rumour_add') {
-									/* /1* Country heard *1/		echo $form->row('country', 'country_heard', $operators->firstTrue(@$_POST['country_heard'], @$_POST['country']), false, 'Country heard', 'form-control'); */
-									/* Area heard */ //		echo $form->row('text', 'city_heard', @$_POST['city_heard'], false, 'Area heard', 'form-control', null, 50);
-													 //		echo $form->row('latlongmap', 'heard_at', $operators->firstTrue((floatval(@$_POST['heard_at_latitude']) <> 0 || floatval(@$_POST['heard_at_longitude']) <> 0 ? floatval(@$_POST['heard_at_latitude']) . "," . floatval(@$_POST['heard_at_longitude']) : false), (@$tl->page['domain_alias']['latitude'] <> 0 && @$tl->page['domain_alias']['longitude'] <> 0 ? @$tl->page['domain_alias']['latitude'] . ',' . @$tl->page['domain_alias']['longitude']: false)));
-									/* /1* Heard on *1/			echo $form->row('datetime_with_picker', 'heard_on', @$_POST['heard_on'], false, 'Heard on', 'form-control'); */
-									/* /1* Location type *1/		echo $form->row('select', 'location_type', @$_POST['location_type'], false, 'Overheard at', 'select2', $locationTypes, null, array('data-placeholder'=>'Overheard at', 'data-tags'=>'true')); */
-								}
-
 	if ($tl->page['template'] == 'rumour_add' && $logged_in['is_proxy']) {
 		/* Source */			echo $form->row('select', 'source_id', @$_POST['source_id'], true, 'Reported via', 'form-control', $rumourSources) . "\n";
 		/* On behalf of */		echo $form->rowStart('on_behalf_of', "Reported on behalf of");

@@ -116,8 +116,6 @@
 			// check for errors
 				if (!$_POST['description']) $tl->page['error'] .= "Please enter a rumour. ";
 				if (!$_POST['country']) $tl->page['error'] .= "Please specify the country where occurred. ";
-				/* if (!$_POST['country_heard']) $tl->page['error'] .= "Please specify the country where heard. "; */
-				/* if (!$_POST['heard_on']) $tl->page['error'] .= "Please specify the date heard. "; */
 				
 				if ($logged_in['is_proxy']) {
 					if (!$_POST['heard_by']) $tl->page['error'] .= "On whose behalf is this rumour created? ";
