@@ -1,9 +1,83 @@
 <?php
 
-	// load Google Charts packages
-		$tl->page['javascript'] .= "  google.load('visualization', '1.1', {packages:['bar', 'corechart']});\n";
+$title = "Statistics" . (@$tl->page['domain_alias']['title'] ? " for " . $tl->page['domain_alias']['title'] : false);
 
-	echo "<h2>Statistics" . (@$tl->page['domain_alias']['title'] ? " for " . $tl->page['domain_alias']['title'] : false) . "</h2>\n";
+if (count($_POST)) {
+	$title .= " ($stats_from_date - $stats_to_date)";
+
+}
+
+// load Google Charts packages
+$tl->page['javascript'] .= "  google.load('visualization', '1.1', {packages:['bar', 'corechart']});\n";
+
+$dateToday = (new DateTime())->format('Y-m-d');
+
+?>
+
+<button type="button" class="btn btn-default pull-right" data-toggle="modal" data-target="#filtersModal">Filters</button>
+<h2><?php echo $title ?></h2>
+
+<div class="modal" id="filtersModal" tabindex="-1" role="dialog">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-body">
+				<form method="POST" id="dateFilterForm" class="form form-horizontal">
+					<label>From:
+						<input type="date" name="from_date" class="form-control" format="%Y-%m-%d"
+							   value="<?php echo substr($stats_from_date, 0, 10); ?>"></input>
+					</label>
+					<label>To:
+						<input type="date" name="to_date" class="form-control" format="%Y-%m-%d"
+						       value="<?php echo substr($stats_to_date, 0, 10); ?>"></input>
+					</label>
+
+					<script>
+						function dateString(daysAgo=0) {
+							var now = new Date();
+							now.setDate(now.getDate() + daysAgo);
+							return now.toISOString().substring(0,10);
+						}
+
+						function filterThisWeek() {
+							document.getElementsByName("from_date")[0].value = dateString(-7);
+							document.getElementsByName("to_date")[0].value = dateString();
+						}
+						function filterThisMonth() {
+							document.getElementsByName("from_date")[0].value = dateString(-30);
+							document.getElementsByName("to_date")[0].value = dateString();
+						}
+						function filterThisYear() {
+							document.getElementsByName("from_date")[0].value = dateString(-365);
+							document.getElementsByName("to_date")[0].value = dateString();
+						}
+						function filterAllTime() {
+							// document.getElementsByName("from_date")[0].value = '2000-01-01';
+							// document.getElementsByName("to_date")[0].value = dateString();
+
+							// Just 'GET' the page, since filters only apply when POST...
+							location.replace(location.href); 
+						}
+					</script>
+					<div class="btn-group">
+						<a class="btn btn-secondary" onclick="filterThisWeek()">Last 7 days</a>
+						<a class="btn btn-secondary" onclick="filterThisMonth()">Last 30 days</a>
+						<a class="btn btn-secondary" onclick="filterThisYear()">Last 365 days</a>
+						<a class="btn btn-secondary" onclick="filterAllTime()">Clear</a>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<input form="dateFilterForm" class="btn btn-primary" type="submit" value="Filter">
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+
+
+<?php
 
 	echo "<div class='pageModule row container-fluid'>\n";
 

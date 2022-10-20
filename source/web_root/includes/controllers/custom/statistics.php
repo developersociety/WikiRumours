@@ -1,66 +1,213 @@
 <?php
 
-/*	--------------------------------------
-	Execute immediately upon load
-	-------------------------------------- */
+function date_from_post_or_default($post_name, $default)
+{
+    /*  Try to get a date from either the current POST data, if it's a valid date,
+     *  and fallback to a default value */
 
-	// rumours
-		if (@$tl->page['domain_alias']['cms_id']) $result = countInDb('rumours', 'rumour_id', array('enabled'=>'1', 'domain_alias_id'=>$tl->page['domain_alias']['cms_id']));
-		else $result = countInDb('rumours', 'rumour_id', array('enabled'=>'1'));
-		$numberOfRumours = floatval(@$result[0]['count']);
+    $output = $default;
 
-	// sightings
-		if (@$tl->page['domain_alias']['cms_id']) {
-			$result = retrieveSightings(array('domain_alias_id'=>$tl->page['domain_alias']['cms_id']));
-			$numberOfSightings = count($result);
-		}
-		else {
-			$result = countInDb('rumour_sightings', 'sighting_id');
-			$numberOfSightings = floatval(@$result[0]['count']);
-		}
+    try {
+        if (array_key_exists($post_name, $_POST) && $_POST[$post_name]) {
+            $parsed_date = date_create($_POST[$post_name]);
+            $output = date_format($parsed_date, 'Y-m-d') ?: $default;
+        }
+    } catch (Exception $err) {
+        error_log($err);
+    };
 
-	// rumours and sightings over time
-		$rumoursAndSightingsByDateChart = array();
-		// sightings
-			$result = directlyQueryDb("SELECT DATE_FORMAT(heard_on, '%M %Y') AS month, COUNT(sighting_id) AS count FROM " . $tablePrefix . "rumour_sightings LEFT JOIN " . $tablePrefix . "rumours ON " . $tablePrefix . "rumour_sightings.rumour_id = " . $tablePrefix . "rumours.rumour_id WHERE heard_on > '0000-00-00 00:00:00' " . (@$tl->page['domain_alias']['cms_id'] ? " AND " . $tablePrefix . "rumours.domain_alias_id = '" . $tl->page['domain_alias']['cms_id'] . "'" : false) . "GROUP BY month ORDER BY heard_on ASC");
-			for ($counter = 0; $counter < count($result); $counter++) {
-				$month = $result[$counter]['month'];
-				if (!count(@$rumoursAndSightingsByDateChart[$month])) $rumoursAndSightingsByDateChart[$month] = array();
-				$rumoursAndSightingsByDateChart[$month]['sightings'] = $result[$counter]['count'];
-			}
-		// rumours
-			$result = retrieveFromDb('rumours', array("DATE_FORMAT(occurred_on, '%M %Y')"=>'month', "COUNT(rumour_id)"=>'count'), null, null, null, null, "occurred_on > '0000-00-00 00:00:00'" . (@$tl->page['domain_alias']['cms_id'] ? " AND " . $tablePrefix . "rumours.domain_alias_id = '" . $tl->page['domain_alias']['cms_id'] . "'" : false), 'month', 'occurred_on ASC');
-			for ($counter = 0; $counter < count($result); $counter++) {
-				$month = $result[$counter]['month'];
-				if (!count(@$rumoursAndSightingsByDateChart[$month])) $rumoursAndSightingsByDateChart[$month] = array();
-				$rumoursAndSightingsByDateChart[$month]['rumours'] = $result[$counter]['count'];
-			}
-		$rumoursAndSightingsByDateTable = array_reverse($rumoursAndSightingsByDateChart);
+    return $output;
+}
 
-	// statuses
-		$statuses = directlyQueryDb("SELECT " . $tablePrefix . "statuses.status, " . $tablePrefix . "statuses.hex_color, COUNT(" . $tablePrefix . "statuses.status) AS count FROM " . $tablePrefix . "rumours LEFT JOIN " . $tablePrefix . "statuses ON " . $tablePrefix . "rumours.status_id = " . $tablePrefix . "statuses.status_id" . (@$tl->page['domain_alias']['cms_id'] ? " WHERE domain_alias_id = '" . $tl->page['domain_alias']['cms_id'] . "'" : false ) . " GROUP BY " . $tablePrefix . "statuses.status ORDER BY position ASC");
+// Individual calculation functions:
 
-	// tags
-		$numberOfTagsToDisplay = 20;
-		$tags = directlyQueryDb("SELECT " . $tablePrefix . "tags.tag, COUNT(" . $tablePrefix . "tags.tag) AS count FROM " . $tablePrefix . "rumours_x_tags LEFT JOIN " . $tablePrefix . "tags ON " . $tablePrefix . "rumours_x_tags.tag_id = " . $tablePrefix . "tags.tag_id LEFT JOIN " . $tablePrefix . "rumours ON " . $tablePrefix . "rumours_x_tags.rumour_id = " . $tablePrefix . "rumours.rumour_id" . (@$tl->page['domain_alias']['cms_id'] ? " WHERE " . $tablePrefix . "rumours.domain_alias_id = '" . $tl->page['domain_alias']['cms_id'] . "'" : false ) . " GROUP BY " . $tablePrefix . "tags.tag ORDER BY count DESC" . ($numberOfTagsToDisplay ? " LIMIT " . $numberOfTagsToDisplay : false));
+function total_rumour_count($stats_from_date, $stats_to_date, $domain_alias_filter)
+{
+    $matching_query = array('enabled' => '1');
 
-	// rumours and sightings by domain alias
-		if (!@$tl->page['domain_alias']['cms_id']) {
-			$rumoursAndSightingsByDomain = directlyQueryDb("SELECT " . $tablePrefix . "cms.title, (SELECT COUNT(*) FROM " . $tablePrefix . "rumours WHERE " . $tablePrefix . "rumours.domain_alias_id = " . $tablePrefix . "cms.cms_id) AS number_of_rumours, (SELECT COUNT(*) FROM " . $tablePrefix . "rumour_sightings LEFT JOIN " . $tablePrefix . "rumours ON " . $tablePrefix . "rumours.rumour_id = " . $tablePrefix . "rumour_sightings.rumour_id WHERE " . $tablePrefix . "rumours.domain_alias_id = " . $tablePrefix . "cms.cms_id) AS number_of_sightings FROM " . $tablePrefix . "cms WHERE " . $tablePrefix . "cms.content_type = 'd' ORDER BY " . $tablePrefix . "cms.title ASC");
-		}
-	
-/*	--------------------------------------
-	Execute only if a form post
-	-------------------------------------- */
-		
-	if (count($_POST) > 0) {
-	}
-	
-/*	--------------------------------------
-	Execute only if not a form post
-	-------------------------------------- */
-		
-	else {
-	}
-		
-?>
+    $result = countInDb(
+        'rumours',
+        'rumour_id',
+        $matching_query,
+        null,
+        null,
+        null,
+        "$domain_alias_filter
+        date(occurred_on) > '${stats_from_date}' AND date(occurred_on) <= '${stats_to_date}'"
+    );
+    return floatval(@$result[0]['count']);
+}
+
+
+function total_sighting_count($stats_from_date, $stats_to_date, $domain_alias_filter)
+{
+	$result = countInDb(
+		'rumour_sightings',
+		'sighting_id',
+		null,
+		null,
+		null,
+		null,
+		"$domain_alias_filter
+		heard_on > '${stats_from_date}' AND heard_on <= '${stats_to_date}'"
+	);
+	return floatval(@$result[0]['count']);
+}
+
+function calculate_sightings_for_months(&$rumoursAndSightingsByDateChart, $stats_from_date, $stats_to_date, $domain_alias_filter)
+{
+    global $tablePrefix;
+    // sightings
+    $result = directlyQueryDb(
+        "SELECT DATE_FORMAT(heard_on, '%M %Y') AS month,
+        COUNT(sighting_id) AS count
+        FROM ${tablePrefix}rumour_sightings
+        LEFT JOIN ${tablePrefix}rumours
+             ON ${tablePrefix}rumour_sightings.rumour_id = ${tablePrefix}rumours.rumour_id
+        WHERE
+            $domain_alias_filter
+            heard_on >= '${stats_from_date}' AND heard_on <= '${stats_to_date}'
+        GROUP BY month ORDER BY heard_on ASC"
+    );
+
+    for ($counter = 0; $counter < count($result); $counter++) {
+        $month = $result[$counter]['month'];
+        if (!count(@$rumoursAndSightingsByDateChart[$month])) {
+            $rumoursAndSightingsByDateChart[$month] = array();
+        }
+        $rumoursAndSightingsByDateChart[$month]['sightings'] = $result[$counter]['count'];
+    }
+}
+
+// rumours
+function calculate_rumours_for_months(&$rumoursAndSightingsByDateChart, $stats_from_date, $stats_to_date, $domain_alias_filter)
+{
+    $result = retrieveFromDb(
+        'rumours',
+        array(
+            "DATE_FORMAT(occurred_on, '%M %Y')" => 'month',
+            "COUNT(rumour_id)" => 'count'
+        ),
+        null,
+        null,
+        null,
+        null,
+		"$domain_alias_filter
+		date(occurred_on) >= '$stats_from_date' AND date(occurred_on) <= '$stats_to_date'",
+        'month',
+        'occurred_on ASC'
+    );
+    for ($counter = 0; $counter < count($result); $counter++) {
+        $month = $result[$counter]['month'];
+        if (!count(@$rumoursAndSightingsByDateChart[$month])) $rumoursAndSightingsByDateChart[$month] = array();
+        $rumoursAndSightingsByDateChart[$month]['rumours'] = $result[$counter]['count'];
+    }
+}
+
+// statuses
+function calculate_statuses($stats_from_date, $stats_to_date, $domain_alias_filter)
+{
+    global $tablePrefix;
+
+    return directlyQueryDb(
+        "SELECT
+            ${tablePrefix}statuses.status,
+            ${tablePrefix}statuses.hex_color,
+            COUNT(${tablePrefix}statuses.status) AS count
+        FROM ${tablePrefix}rumours
+        LEFT JOIN ${tablePrefix}statuses
+        ON ${tablePrefix}rumours.status_id = ${tablePrefix}statuses.status_id
+        WHERE
+            $domain_alias_filter
+            date(occurred_on) >= '${stats_from_date}' AND date(occurred_on) <= '${stats_to_date}'
+        GROUP BY ${tablePrefix}statuses.status
+        ORDER BY position ASC"
+    );
+}
+
+function calculate_tags($stats_from_date, $stats_to_date, $domain_alias_filter, $numberOfTagsToDisplay = 20)
+{
+    global $tablePrefix;
+
+    return directlyQueryDb(
+        "SELECT
+            ${tablePrefix}tags.tag,
+            COUNT(${tablePrefix}tags.tag) AS count
+        FROM ${tablePrefix}rumours_x_tags
+        LEFT JOIN ${tablePrefix}tags
+            ON ${tablePrefix}rumours_x_tags.tag_id = ${tablePrefix}tags.tag_id
+        LEFT JOIN ${tablePrefix}rumours
+            ON ${tablePrefix}rumours_x_tags.rumour_id = ${tablePrefix}rumours.rumour_id
+        WHERE
+            $domain_alias_filter
+            date(occurred_on) >= '${stats_from_date}' AND date(occurred_on) <= '${stats_to_date}'
+        GROUP BY ${tablePrefix}tags.tag
+        ORDER BY count DESC" . ($numberOfTagsToDisplay ? " LIMIT " . $numberOfTagsToDisplay : false)
+    );
+}
+
+function calculate_rumours_and_sightings_by_domain($stats_from_date, $stats_to_date)
+{
+    global $tablePrefix;
+    return directlyQueryDb("
+    SELECT
+        ${tablePrefix}cms.title,
+        (SELECT 
+            COUNT(*)
+            FROM ${tablePrefix}rumours
+			WHERE
+				${tablePrefix}rumours.domain_alias_id = ${tablePrefix}cms.cms_id
+				AND date(occurred_on) >= '${stats_from_date}' AND date(occurred_on) <= '${stats_to_date}'
+        ) AS number_of_rumours,
+        (SELECT
+            COUNT(*) FROM ${tablePrefix}rumour_sightings
+            LEFT JOIN ${tablePrefix}rumours
+            ON ${tablePrefix}rumours.rumour_id = ${tablePrefix}rumour_sightings.rumour_id
+			WHERE
+				${tablePrefix}rumours.domain_alias_id = ${tablePrefix}cms.cms_id
+				AND date(occurred_on) >= '${stats_from_date}' AND date(occurred_on) <= '${stats_to_date}'
+        ) AS number_of_sightings
+    FROM ${tablePrefix}cms
+    WHERE ${tablePrefix}cms.content_type = 'd'
+    ORDER BY ${tablePrefix}cms.title ASC");
+}
+
+/* *******************************************************************
+ * Now all the individual calcualtions are defined as functions,
+ * calculate them all using the appropriate filters, etc,
+ * and store them as variables that are used in includes/views/desktop/custom/statistics.php
+ ********************************************************************* */
+
+$stats_from_date = date_from_post_or_default('from_date', '2000-01-01');
+$stats_to_date = date_from_post_or_default('to_date', (new DateTime())->format('Y-m-d'));
+
+// Domain Alias filter:
+
+// generate a chunk of SQL which can go between WHERE and the dates filtering,
+// with an AND at the end of it - if the current view is being rendered on a subsite,
+// to limit results to just that subsite
+if (@$tl->page['domain_alias']['cms_id']) {
+    $domain_alias_filter = "${tablePrefix}rumours.domain_alias_id = '" . $tl->page['domain_alias']['cms_id'] . "' AND";
+} else {
+    $domain_alias_filter = '';
+}
+
+
+// Get results of calculations
+$numberOfSightings = total_sighting_count($stats_from_date, $stats_to_date, $domain_alias_filter);
+$numberOfRumours = total_rumour_count($stats_from_date, $stats_to_date, $domain_alias_filter);
+
+// rumours and sightings over time
+$rumoursAndSightingsByDateChart = array();
+calculate_sightings_for_months($rumoursAndSightingsByDateChart, $stats_from_date, $stats_to_date, $domain_alias_filter);
+calculate_rumours_for_months($rumoursAndSightingsByDateChart, $stats_from_date, $stats_to_date, $domain_alias_filter);
+// And generate the table - which should be most-recent-first:
+$rumoursAndSightingsByDateTable = array_reverse($rumoursAndSightingsByDateChart);
+
+$statuses = calculate_statuses($stats_from_date, $stats_to_date, $domain_alias_filter);
+$tags = calculate_tags($stats_from_date, $stats_to_date, $domain_alias_filter);
+
+// rumours and sightings by domain alias
+if (!@$tl->page['domain_alias']['cms_id']) {
+    $rumoursAndSightingsByDomain = calculate_rumours_and_sightings_by_domain($stats_from_date, $stats_to_date);
+}
