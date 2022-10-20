@@ -211,3 +211,53 @@ $tags = calculate_tags($stats_from_date, $stats_to_date, $domain_alias_filter);
 if (!@$tl->page['domain_alias']['cms_id']) {
     $rumoursAndSightingsByDomain = calculate_rumours_and_sightings_by_domain($stats_from_date, $stats_to_date);
 }
+
+
+if (array_key_exists('action', $_POST) && $_POST['action'] == 'Export') {
+	// If the user requested an export, then return a CSV File download, rather than
+	// regular page rendering:
+
+	$filename = "statistics_${stats_from_date}-to-${stats_to_date}";
+	header("Content-type: text/csv");
+	header("Content-Disposition: attachment; filename=$filename.csv");
+	header("Pragma: no-cache");
+	header("Expires: 0");
+
+	/* echo "<pre>"; */
+
+	$data = array(
+		"New Rumours" => $numberOfRumours,
+		"New Sightings" => $numberOfSightings,
+	);
+
+	foreach (array_values($statuses) as $status_option) {
+		$data['Status:' . $status_option['status']] = $status_option['count'];
+	}
+
+	foreach (array_values($tags) as $tag_option) {
+		$data['Tag:' . $tag_option['tag']] = $tag_option['count'];
+	}
+
+
+	foreach (array_values($tags) as $tag_option) {
+		$data['Tag:' . $tag_option['tag']] = $tag_option['count'];
+	}
+
+	if (isset($rumoursAndSightingsByDomain)) {
+		foreach (array_values($rumoursAndSightingsByDomain) as $domain_option) {
+			$data[$domain_option['title'] . ' Rumours'] = $domain_option['number_of_rumours'];
+			$data[$domain_option['title'] . ' Sightings'] = $domain_option['number_of_sightings'];
+		}
+	}
+
+	# Produce the CSV from the key => value data array...
+	echo implode(',', array_keys($data));
+	echo "\n";
+	echo implode(',', array_values($data));
+	echo "\n";
+
+	/* echo "</pre>"; */
+
+	// And Don't attempt any further page rendering:
+	exit(0);
+}
