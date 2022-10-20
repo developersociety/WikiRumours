@@ -67,7 +67,8 @@ $dateToday = (new DateTime())->format('Y-m-d');
 				</form>
 			</div>
 			<div class="modal-footer">
-				<input form="dateFilterForm" class="btn btn-primary" type="submit" value="Filter">
+				<input form="dateFilterForm" class="btn btn-primary pull-left" type="submit" name="action" value="Export">
+				<input form="dateFilterForm" class="btn btn-primary" type="submit" name="action" value="Filter">
 			</div>
 		</div>
 	</div>
@@ -302,7 +303,7 @@ $dateToday = (new DateTime())->format('Y-m-d');
 		// rumours and sightings per domain
 			echo "<div class='pageModule row'>\n";
 			echo "  <div class='col-lg-12 col-md-12 col-sm-12 col-xs-12'>\n";
-			echo "    <h3>Deployments of WikiRumours</h3>\n";
+			echo "    <h3>Deployments of MSF-Listen</h3>\n";
 			echo "    <div id='rumoursAndSightingsByDomainChart' style='width: 100%; height: auto;''></div>\n";
 			echo "  </div>\n";
 			echo "</div>\n";
