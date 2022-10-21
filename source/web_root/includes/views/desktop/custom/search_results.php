@@ -1,6 +1,20 @@
 <?php
 
-	echo "<h2>" . $tl->page['title'] . "</h2>\n";
+echo "<h2>" . $tl->page['title'] . "</h2>\n";
+
+// Only display search filters if this view is being used as a search view - NOT as a generic
+// report listing view...
+if (strncmp($tl->page['parameter1'],'report', 6)) {
+	echo renderTemplate('search/search_form.php', [
+		'form' => $form,
+		'keywords' => $keywords,
+		'filters' => $filters,
+		'rumourPriorities' => $rumourPriorities,
+		'rumourStatuses' => $rumourStatuses,
+		'rumourTags' => $rumourTags,
+
+	]);
+}
 			
 	if (count($rumours) < 1) {
 		echo "<p>No matching rumours found.</p>\n";
@@ -120,5 +134,3 @@
 		echo "</div>\n";
 		
 	}
-	
-?>
