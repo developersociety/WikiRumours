@@ -43,7 +43,8 @@
 		// API
 			echo "            <div>\n";
 			echo "              <span class='pull-left transluscent'><span class='glyphicon glyphicon-new-window'></span>&nbsp;&nbsp;</span>\n";
-			echo "              <div class='siteNavItemLabel'><a href='/explore_api'>Explore the API</a></div>\n";
+			// Explore the API Link hidden by default https://app.forecast.it/project/P-211/workflow/T14801
+			// echo "              <div class='siteNavItemLabel'><a href='/explore_api'>Explore the API</a></div>\n";
 			echo "            </div>\n";
 		// About
 			echo "            <div>\n";
