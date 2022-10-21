@@ -116,8 +116,6 @@
 			// check for errors
 				if (!$_POST['description']) $tl->page['error'] .= "Please enter a rumour. ";
 				if (!$_POST['country']) $tl->page['error'] .= "Please specify the country where occurred. ";
-				if (!$_POST['country_heard']) $tl->page['error'] .= "Please specify the country where heard. ";
-				if (!$_POST['heard_on']) $tl->page['error'] .= "Please specify the date heard. ";
 				
 				if ($logged_in['is_proxy']) {
 					if (!$_POST['heard_by']) $tl->page['error'] .= "On whose behalf is this rumour created? ";
@@ -185,9 +183,30 @@
 								}
 
 							// add rumour
-								$rumourID = insertIntoDb('rumours', array('public_id'=>$newRumourPublicID, 'description'=>$_POST['description'], 'country_id'=>$_POST['country'], 'city'=>$_POST['city'], 'latitude'=>$_POST['occurred_at_latitude'], 'longitude'=>$_POST['occurred_at_longitude'], 'occurred_on'=>$_POST['occurred_on'], 'created_by'=>$heardBy, 'created_on'=>date('Y-m-d H:i:s'), 'updated_by'=>$logged_in['user_id'], 'updated_on'=>date('Y-m-d H:i:s'), 'entered_by'=>$logged_in['user_id'], 'status_id'=>@$_POST['status_id'], 'priority_id'=>@$_POST['priority_id'], 'assigned_to'=>@$_POST['assigned_to'], 'domain_alias_id'=>@$tl->page['domain_alias']['cms_id']));
-								if (!$rumourID) $tl->page['error'] .= "Unable to add rumour for some reason. ";
-								else {
+								$rumourID = insertIntoDb(
+									'rumours',
+									array(
+										'public_id'=>$newRumourPublicID,
+										'description'=>$_POST['description'],
+										'country_id'=>$_POST['country'],
+										'city'=>$_POST['city'],
+										'latitude'=>$_POST['occurred_at_latitude'],
+										'longitude'=>$_POST['occurred_at_longitude'],
+										'occurred_on'=>$_POST['occurred_on'],
+										'created_by'=>$heardBy,
+										'created_on'=>date('Y-m-d H:i:s'),
+										'updated_by'=>$logged_in['user_id'],
+										'updated_on'=>date('Y-m-d H:i:s'),
+										'entered_by'=>$logged_in['user_id'],
+										'status_id'=>@$_POST['status_id'],
+										'priority_id'=>@$_POST['priority_id'],
+										'assigned_to'=>@$_POST['assigned_to'],
+										'domain_alias_id'=>@$tl->page['domain_alias']['cms_id']
+									)
+								);
+								if (!$rumourID) {
+								   	$tl->page['error'] .= "Unable to add rumour for some reason. ";
+								} else {
 			
 /*
 									REMOVING FAUX GEOCODING:
@@ -227,7 +246,25 @@
 						if (!count($latLong)) $latLong = retrieveSingleFromDB('rumours', null, array('country_id'=>@$_POST['country_heard'], 'city'=>@$_POST['city_heard']), null, null, null, "latitude <> 0 AND longitude <> 0");
 */
 
-						$sightingID = insertIntoDb('rumour_sightings', array('public_id'=>$newSightingPublicID, 'created_by'=>$heardBy, 'rumour_id'=>$operators->firstTrue(@$rumourID, @$rumour[0]['rumour_id']), 'entered_by'=>$logged_in['user_id'], 'entered_on'=>date('Y-m-d H:i:s'), 'heard_on'=>$_POST['heard_on'], 'country_id'=>@$_POST['country_heard'], 'city'=>@$_POST['city_heard'], 'latitude'=>@$_POST['heard_at_latitude'], 'longitude'=>@$_POST['heard_at_longitude'], 'location_type'=>$_POST['location_type'], 'source_id'=>@$_POST['source_id'], 'ipv4'=>@$ipv4, 'ipv6'=>@$ipv6));
+						$sightingID = insertIntoDb(
+							'rumour_sightings',
+							array(
+								'public_id'=>$newSightingPublicID,
+								'created_by'=>$heardBy,
+								'rumour_id'=>$operators->firstTrue(@$rumourID, @$rumour[0]['rumour_id']),
+								'entered_by'=>$logged_in['user_id'],
+								'entered_on'=>date('Y-m-d H:i:s'),
+								'heard_on'=>$_POST['occurred_on'],
+								'country_id'=>@$_POST['country_heard'],
+								'city'=>@$_POST['city'],
+								'latitude'=>@$_POST['occurred_at_latitude'],
+								'longitude'=>@$_POST['occurred_at_longitude'],
+								'location_type'=>$_POST['location_type'],
+								'source_id'=>@$_POST['source_id'],
+								'ipv4'=>@$ipv4,
+								'ipv6'=>@$ipv6
+							)
+						);
 				
 					// automatically watchlist rumour on behalf of creator
 						deleteFromDbSingle('watchlist', array('rumour_id'=>$operators->firstTrue(@$rumourID, @$rumour[0]['rumour_id']), 'created_by'=>$heardBy));

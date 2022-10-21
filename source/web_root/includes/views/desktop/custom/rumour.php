@@ -170,10 +170,7 @@
 			// add comment
 				echo "  " . $form->input('button', 'addCommentButton', null, false, "<span class='glyphicon glyphicon-comment'></span> Comment", 'btn btn-default', null, null, array('data-toggle'=>'collapse', 'href'=>'#addComment')) . "\n";
 			// edit
-				if ($logged_in['is_administrator'] && $logged_in['can_edit_content']) $buttonText = 'Edit';
-				elseif ($logged_in['is_moderator'] && $rumour[0]['assigned_to']) $buttonText = 'Reassign';
-				elseif ($logged_in['is_moderator'] && !$rumour[0]['assigned_to']) $buttonText = 'Assign';
-				elseif ($logged_in['is_community_liaison'] && $rumour[0]['assigned_to'] == $logged_in['user_id']) $buttonText = 'Reassign';
+				$buttonText = 'Edit';
 				if (@$buttonText) echo "  " . $form->input('button', 'editRumourButton', null, false, "<span class='glyphicon glyphicon-edit'></span> " . $buttonText, 'btn btn-default', null, null, null, null, array('onClick'=>'document.location.href="/rumour_edit/' . $publicID . '"; return false;'));
 			echo "</div>\n";
 			echo $form->end() . "\n";
