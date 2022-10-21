@@ -41,15 +41,18 @@ function total_rumour_count($stats_from_date, $stats_to_date, $domain_alias_filt
 
 function total_sighting_count($stats_from_date, $stats_to_date, $domain_alias_filter)
 {
-	$result = countInDb(
-		'rumour_sightings',
-		'sighting_id',
-		null,
-		null,
-		null,
-		null,
-		"$domain_alias_filter
-		heard_on > '${stats_from_date}' AND heard_on <= '${stats_to_date}'"
+	global $tablePrefix;
+	$result = directlyQueryDb(
+		"
+		SELECT
+			COUNT(sighting_id) AS count
+		FROM
+			${tablePrefix}rumour_sightings
+		LEFT JOIN ${tablePrefix}rumours
+			ON ${tablePrefix}rumour_sightings.rumour_id = ${tablePrefix}rumours.rumour_id
+		WHERE
+			${domain_alias_filter}
+			date(heard_on) >= '${stats_from_date}' AND date(heard_on) <= '${stats_to_date}'"
 	);
 	return floatval(@$result[0]['count']);
 }
