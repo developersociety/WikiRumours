@@ -40,15 +40,15 @@
 			echo "              <div class='siteNavItemLabel'><a href='/about'>About " . htmlspecialchars($tl->settings['Name of this application'], ENT_QUOTES) . "</a></div>\n";
 			echo "            </div>\n";
 		// Help
-			echo "            <div>\n";
-			echo "              <span class='pull-left transluscent'><span class='glyphicon glyphicon-question-sign'></span>&nbsp;&nbsp;</span>\n";
-			echo "              <div class='siteNavItemLabel'><a href='/help'>Help</a></div>\n";
-			echo "            </div>\n";
-		// Contact
-			echo "            <div>\n";
-			echo "              <span class='pull-left transluscent'><span class='glyphicon glyphicon-envelope'></span>&nbsp;&nbsp;</span>\n";
-			echo "              <div class='siteNavItemLabel'><a href='/contact'>Contact us</a></div>\n";
-			echo "            </div>\n";
+			/* echo "            <div>\n"; */
+			/* echo "              <span class='pull-left transluscent'><span class='glyphicon glyphicon-question-sign'></span>&nbsp;&nbsp;</span>\n"; */
+			/* echo "              <div class='siteNavItemLabel'><a href='/help'>Help</a></div>\n"; */
+			/* echo "            </div>\n"; */
+		/* // Contact */
+			/* echo "            <div>\n"; */
+			/* echo "              <span class='pull-left transluscent'><span class='glyphicon glyphicon-envelope'></span>&nbsp;&nbsp;</span>\n"; */
+			/* echo "              <div class='siteNavItemLabel'><a href='/contact'>Contact us</a></div>\n"; */
+			/* echo "            </div>\n"; */
 		
 	echo "          </div><!-- siteNavLiner -->\n";
 	
