@@ -25,7 +25,7 @@
 		// Search
 			echo "              <div id='siteNavSearch' class='container-fluid'>\n";
 			echo "                <div class='form-group'>" . $form->input('search', 'search_keywords', @$keywords, false, null, 'form-control') . "</div>\n";
-			echo "                </div><!-- siteNavSearchAdvancedToggle -->\n";
+			/* echo "                </div><!-- siteNavSearchAdvancedToggle -->\n"; */
 			echo "              </div><!-- siteNavSearch -->\n";
 		echo "            " . $form->end() . "<!-- searchForm -->\n";
 		// API
