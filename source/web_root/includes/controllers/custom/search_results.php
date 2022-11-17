@@ -46,6 +46,15 @@
 		if ($keywords) {
 			$keywordsExplode = explode(' ', $keywords);
 			$otherCriteria .= " AND (1=2";
+
+            // This adds in search in all tag names via a subquery... there are probably more efficient ways to do this
+            // but this is the quick hacky fix for now.
+            $tagQ = (" OR ${tablePrefix}rumours.rumour_id IN (
+                    SELECT xt.rumour_id FROM ${tablePrefix}rumours_x_tags xt
+                        LEFT JOIN ${tablePrefix}tags t ON t.tag_id = xt.tag_id WHERE 
+                        LOWER(t.tag) REGEXP '" .  addslashes(trim(strtolower(implode('|', $keywordsExplode)))) . "')");
+            $otherCriteria .= $tagQ;
+
 			foreach ($keywordsExplode as $keyword) {
 				if (trim($keyword)) $otherCriteria .= " OR LOWER(description) LIKE '%" . addSlashes(trim(strtolower($keyword))) . "%'";
 			}
