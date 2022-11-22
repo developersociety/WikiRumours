@@ -274,7 +274,31 @@
 				
 			// notify moderator
 				if (!$tl->page['error']) {
-					$moderators = retrieveUsers(array('is_moderator'=>'1', 'ok_to_contact'=>'1'), null, $tablePrefix . "users.email != ''");
+                    // Filter users to only ones with a valid email:
+                    $moderator_qs = "${tablePrefix}users.email != ''";
+                    // And only ones who have the correct 'notify:<subdomain>` set in their "city" (community) field:
+                    $moderator_qs .= " AND LOWER(${tablePrefix}users.city) REGEXP 'notify:";
+                    if ($tl->page['domain_alias']['source_url_subdomain']){
+                        // if there is a subdomain specified, then use that:
+                        $moderator_qs .= addSlashes(trim(str_replace("'", "", strtolower($tl->page['domain_alias']['source_url_subdomain']))));
+                        $moderator_qs .= '|notify:all';
+                    } else if ($tl->page['domain_alias']['source_url']) {
+                        // if there is NO subdomain specified, but there is a domain alias active,
+                        // then use the first part of that (up to the first '.')
+                        $moderator_qs .= addSlashes(trim(str_replace("'", "", strtolower(strstr($tl->page['domain_alias']['source_url'], '.', true)))));
+                        $moderator_qs .= '|notify:all';
+                    } else {
+                        $moderator_qs .= 'all';
+                    }
+                    $moderator_qs .="'";
+
+                    $moderators = retrieveUsers(
+                        array('is_moderator'=>'1', 'ok_to_contact'=>'1'), // matching
+                        null, // containing
+                        $moderator_qs // other criteria
+                        //$tablePrefix . "users.email != ''" // other criteria...
+                    );
+
 					if (count($moderators) < 1) {
 						$activity = "Added a rumour, but no moderator has been designated to assign it.";
 						$logger->logItInDb($activity, null, null, array('is_error'=>'1', 'is_resolved'=>'0'));
